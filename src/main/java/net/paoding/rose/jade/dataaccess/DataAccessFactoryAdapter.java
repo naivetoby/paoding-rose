@@ -16,11 +16,10 @@
 package net.paoding.rose.jade.dataaccess;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.DataSource;
 
 import net.paoding.rose.jade.statement.StatementMetaData;
+
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * 框架内部使用的 {@link DataAccessFactory}实现，适配到 {@link DataSourceFactory}
@@ -28,17 +27,15 @@ import net.paoding.rose.jade.statement.StatementMetaData;
  * 
  * @see DataSourceFactory
  * 
- * @author 王志亮 [qieqie.wang@gmail.com]
+ * @author qieqie
  * 
  */
 public class DataAccessFactoryAdapter implements DataAccessFactory {
 
-    private final DataSourceFactory dataSourceFactory;
-    private final ConcurrentHashMap<DataSource, DataAccess> dataAccessCache ;
+    protected final DataSourceFactory dataSourceFactory;
 
     public DataAccessFactoryAdapter(DataSourceFactory dataSourceFactory) {
         this.dataSourceFactory = dataSourceFactory;
-        this.dataAccessCache = new ConcurrentHashMap<DataSource, DataAccess>();
     }
 
     public DataSourceFactory getDataSourceFactory() {
@@ -46,20 +43,15 @@ public class DataAccessFactoryAdapter implements DataAccessFactory {
     }
 
     @Override
-    public DataAccess getDataAccess(StatementMetaData metaData, Map<String, Object> attributes) {
-        DataSourceHolder holder = dataSourceFactory.getHolder(metaData, attributes);
+    public DataAccess getDataAccess(StatementMetaData metaData, Map<String, Object> runtime) {
+        DataSourceHolder holder = dataSourceFactory.getHolder(metaData, runtime);
         while (holder != null && holder.isFactory()) {
-            holder = holder.getFactory().getHolder(metaData, attributes);
+            holder = holder.getFactory().getHolder(metaData, runtime);
         }
         if (holder == null || holder.getDataSource() == null) {
             throw new NullPointerException("cannot found a dataSource for: " + metaData);
         }
-        DataSource dataSource = holder.getDataSource();
-        DataAccess dataAccess = dataAccessCache.get(dataSource);
-        if (dataAccess == null) {
-            dataAccessCache.putIfAbsent(dataSource, new DataAccessImpl(dataSource));
-            dataAccess = dataAccessCache.get(dataSource);
-        }
-        return dataAccess;
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(holder.getDataSource());
+        return new DataAccessImpl(jdbcTemplate);
     }
 }

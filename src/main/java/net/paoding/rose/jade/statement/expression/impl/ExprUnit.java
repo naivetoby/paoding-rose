@@ -37,9 +37,9 @@ public class ExprUnit implements ExqlUnit {
     public void fill(ExqlContext exqlContext, ExprResolver exprResolver) throws Exception {
 
         // 解释表达式内容
-        Object value = exprResolver.executeExpr(expr);
-        
+        Object obj = exprResolver.executeExpr(expr);
+
         // 输出转义的对象内容
-        exqlContext.fillValue(value);
+        exqlContext.fillValue(obj);
     }
 }

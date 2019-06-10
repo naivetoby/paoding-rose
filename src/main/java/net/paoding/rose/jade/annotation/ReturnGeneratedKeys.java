@@ -21,9 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.paoding.rose.jade.statement.DynamicReturnGeneratedKeys;
-import net.paoding.rose.jade.statement.StatementRuntime;
-
 /**
  * 
  * 将 {@link ReturnGeneratedKeys} 声明在insert语句的方法上，表示返回的是插入的id。
@@ -42,19 +39,8 @@ import net.paoding.rose.jade.statement.StatementRuntime;
  * @author 王志亮 [qieqie.wang@gmail.com]
  * @author 廖涵 [in355hz@gmail.com]
  */
-@Target({ ElementType.METHOD })
+@Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ReturnGeneratedKeys {
-
-    Class<? extends DynamicReturnGeneratedKeys>value() default Yes.class;
-
-    static class Yes extends DynamicReturnGeneratedKeys {
-
-        @Override
-        public boolean shouldReturnGerneratedKeys(StatementRuntime runtime) {
-            return true;
-        }
-
-    }
 }

@@ -48,7 +48,7 @@ import org.springframework.util.CollectionUtils;
  * mainFactory.setSlaves(new RandomDataSourceFactory(slaves));
  * </pre>
  * 
- * @author 王志亮 [qieqie.wang@gmail.com]
+ * @author qieqie
  * 
  */
 public class MasterSlaveDataSourceFactory implements DataSourceFactory {

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
  * 
- * @author 王志亮 [qieqie.wang@gmail.com]
+ * @author qieqie
  * 
  */
 public class SpringDataSourceFactoryDelegate implements DataSourceFactory {

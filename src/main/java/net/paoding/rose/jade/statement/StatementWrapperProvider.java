@@ -17,7 +17,7 @@ package net.paoding.rose.jade.statement;
 
 /**
  * 
- * @author 王志亮 [qieqie.wang@gmail.com]
+ * @author qieqie
  *
  */
 public interface StatementWrapperProvider {

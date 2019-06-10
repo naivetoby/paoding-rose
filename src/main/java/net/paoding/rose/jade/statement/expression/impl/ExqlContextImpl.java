@@ -23,30 +23,23 @@ public class ExqlContextImpl implements ExqlContext  {
     private static final char COMMA = ',';
 
     // 参数列表
-    protected final ArrayList<Object> args = new ArrayList<Object>();
+    protected final ArrayList<Object> params = new ArrayList<Object>();
 
     // 输出缓冲区
-    protected final StringBuilder builder = new StringBuilder(256);
+    protected final StringBuilder builder;
 
     /**
      * 构造上下文对象。
      * 
      * @param capacity - 缓存的容量
      */
-    public ExqlContextImpl() {
-    }
-
-    /**
-     * 清理以便下次使用
-     */
-    public void clear() {
-        this.args.clear();
-        this.builder.setLength(0);
+    public ExqlContextImpl(int capacity) {
+        builder = new StringBuilder(capacity);
     }
 
     @Override
-    public Object[] getArgs() {
-        return args.toArray();
+    public Object[] getParams() {
+        return params.toArray();
     }
 
     @Override
@@ -78,7 +71,7 @@ public class ExqlContextImpl implements ExqlContext  {
         } else {
 
             // 直接输出参数, "uid > :var" --> "uid > ?"
-            addArg(obj);
+            setParam(obj);
 
             builder.append(QUESTION);
         }
@@ -99,11 +92,8 @@ public class ExqlContextImpl implements ExqlContext  {
      * 
      * @param value - 参数的内容
      */
-    protected void addArg(Object value) {
-        if (value instanceof Enum) {
-            value = ((Enum<?>) value).name();
-        }
-        args.add(value);
+    protected void setParam(Object value) {
+        params.add(value);
     }
 
     /**
@@ -136,7 +126,7 @@ public class ExqlContextImpl implements ExqlContext  {
                     }
 
                     // 输出参数内容
-                    addArg(value);
+                    setParam(value);
 
                     builder.append(QUESTION);
 
@@ -151,7 +141,7 @@ public class ExqlContextImpl implements ExqlContext  {
     // 进行简单测试
     public static void main(String... args) throws Exception {
 
-        ExqlContext context = new ExqlContextImpl();
+        ExqlContext context = new ExqlContextImpl(1024);
 
         context.fillText("WHERE uid = ");
         context.fillValue(102);
@@ -164,6 +154,6 @@ public class ExqlContextImpl implements ExqlContext  {
         context.fillChar(')');
 
         System.out.println(context.flushOut());
-        System.out.println(Arrays.toString(context.getArgs()));
+        System.out.println(Arrays.toString(context.getParams()));
     }
 }
