@@ -46,9 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
- * 
  * @author 王志亮 [qieqie.wang@gmail.com]
- * 
  */
 public class JadeInvocationHandler implements InvocationHandler {
 
@@ -65,16 +63,16 @@ public class JadeInvocationHandler implements InvocationHandler {
     private final InterpreterFactory interpreterFactory;
 
     private final CacheProvider cacheProvider;
-    
+
     private final StatementWrapperProvider statementWrapperProvider;
-    
+
     public JadeInvocationHandler(//
-            DAOMetaData daoMetaData,//
-            InterpreterFactory interpreterFactory, //
-            RowMapperFactory rowMapperFactory,//
-            DataAccessFactory dataAccessFactory,//
-            CacheProvider cacheProvider, //
-            StatementWrapperProvider statementWrapperProvider) {
+                                 DAOMetaData daoMetaData,//
+                                 InterpreterFactory interpreterFactory, //
+                                 RowMapperFactory rowMapperFactory,//
+                                 DataAccessFactory dataAccessFactory,//
+                                 CacheProvider cacheProvider, //
+                                 StatementWrapperProvider statementWrapperProvider) {
         this.daoMetaData = daoMetaData;
         this.rowMapperFactory = rowMapperFactory;
         this.dataAccessFactory = dataAccessFactory;
@@ -83,9 +81,9 @@ public class JadeInvocationHandler implements InvocationHandler {
         this.statementWrapperProvider = statementWrapperProvider;
     }
 
-    private static final String[] INDEX_NAMES = new String[] { ":1", ":2", ":3", ":4", ":5", ":6",
+    private static final String[] INDEX_NAMES = new String[]{":1", ":2", ":3", ":4", ":5", ":6",
             ":7", ":8", ":9", ":10", ":11", ":12", ":13", ":14", ":15", ":16", ":17", ":18", ":19",
-            ":20", ":21", ":22", ":23", ":24", ":25", ":26", ":27", ":28", ":29", ":30", };
+            ":20", ":21", ":22", ":23", ":24", ":25", ":26", ":27", ":28", ":29", ":30",};
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -116,40 +114,8 @@ public class JadeInvocationHandler implements InvocationHandler {
                 }
             }
         }
-        // logging
-        StringBuilder invocationInfo = null;
-        if (debugEnabled) {
-            invocationInfo = getInvocationInfo(statemenetMetaData, parameters);
-            logger.debug("invoking " + invocationInfo.toString());
-        }
 
-        // executing
-        long begin = System.currentTimeMillis();
-        final Object result = statement.execute(parameters);
-        long cost = System.currentTimeMillis() - begin;
-
-        // logging
-        if (logger.isInfoEnabled()) {
-            if (invocationInfo == null) {
-                invocationInfo = getInvocationInfo(statemenetMetaData, parameters);
-            }
-            logger.info("cost " + cost + "ms: " + invocationInfo);
-        }
-        return result;
-    }
-
-    private StringBuilder getInvocationInfo(StatementMetaData metaData,
-            Map<String, Object> parameters) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(metaData).append("\n");
-        sb.append("\tsql: ").append(metaData.getSQL()).append("\n");
-        sb.append("\tparameters: ");
-        ArrayList<String> keys = new ArrayList<String>(parameters.keySet());
-        Collections.sort(keys);
-        for (String key : keys) {
-            sb.append(key).append("='").append(parameters.get(key)).append("'  ");
-        }
-        return sb;
+        return statement.execute(parameters);
     }
 
     private Statement getStatement(Method method) {
@@ -178,7 +144,7 @@ public class JadeInvocationHandler implements InvocationHandler {
         }
         return statement;
     }
-    
+
     private Statement wrap(Statement statement) {
         if (statementWrapperProvider != null) {
             return statementWrapperProvider.wrap(statement);
@@ -189,16 +155,16 @@ public class JadeInvocationHandler implements InvocationHandler {
     private Object invokeObjectMethod(Object proxy, Method method, Object[] args)
             throws CloneNotSupportedException {
         String methodName = method.getName();
-        if (methodName.equals("toString")) {
+        if ("toString".equals(methodName)) {
             return JadeInvocationHandler.this.toString();
         }
-        if (methodName.equals("hashCode")) {
+        if ("hashCode".equals(methodName)) {
             return daoMetaData.getDAOClass().hashCode() * 13 + this.hashCode();
         }
-        if (methodName.equals("equals")) {
+        if ("equals".equals(methodName)) {
             return args[0] == proxy;
         }
-        if (methodName.equals("clone")) {
+        if ("clone".equals(methodName)) {
             throw new CloneNotSupportedException("clone is not supported for jade dao.");
         }
         throw new UnsupportedOperationException(daoMetaData.getDAOClass().getName() + "#"
@@ -208,9 +174,7 @@ public class JadeInvocationHandler implements InvocationHandler {
     @Override
     public String toString() {
         DAO dao = daoMetaData.getDAOClass().getAnnotation(DAO.class);
-        String toString = daoMetaData.getDAOClass().getName()//
-                + "[catalog=" + dao.catalog() + "]";
-        return toString;
+        return daoMetaData.getDAOClass().getName() + "[catalog=" + dao.catalog() + "]";
     }
 
 }
