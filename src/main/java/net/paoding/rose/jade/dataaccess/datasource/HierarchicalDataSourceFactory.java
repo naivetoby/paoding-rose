@@ -68,7 +68,7 @@ public class HierarchicalDataSourceFactory implements DataSourceFactory {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("blank name");
         }
-        if (name.equals("*")) {
+        if ("*".equals(name)) {
             defaultDataSource = new DataSourceHolder(dataSource);
         } else {
             dataSources.putIfAbsent(name, new DataSourceHolder(dataSource));
@@ -89,7 +89,7 @@ public class HierarchicalDataSourceFactory implements DataSourceFactory {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("blank name");
         }
-        if (name.equals("*")) {
+        if ("*".equals(name)) {
             defaultDataSource = new DataSourceHolder(dataSource);
         } else {
             dataSources.putIfAbsent(name, new DataSourceHolder(dataSource));
