@@ -1,8 +1,6 @@
 package net.paoding.rose.jade.statement.expression.impl;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.paoding.rose.jade.statement.expression.ExprResolver;
@@ -15,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * 实现语句的执行接口。
- * 
+ *
  * @author han.liao
  */
 public class ExqlPatternImpl implements ExqlPattern {
@@ -34,9 +32,9 @@ public class ExqlPatternImpl implements ExqlPattern {
 
     /**
      * 构造语句的执行接口。
-     * 
+     *
      * @param pattern - 编译的语句
-     * @param unit - 输出的单元
+     * @param unit    - 输出的单元
      */
     protected ExqlPatternImpl(String pattern, ExqlUnit unit) {
         this.pattern = pattern;
@@ -45,9 +43,8 @@ public class ExqlPatternImpl implements ExqlPattern {
 
     /**
      * 从语句编译: ExqlPattern 对象。
-     * 
+     *
      * @param pattern - 待编译的语句
-     * 
      * @return ExqlPattern 对象
      */
     public static ExqlPattern compile(String pattern) {
@@ -108,21 +105,43 @@ public class ExqlPatternImpl implements ExqlPattern {
     public static void main(String... args) throws Exception {
 
         // 编译下列语句
-        ExqlPattern pattern = ExqlPatternImpl
-                .compile("SELECT #(:expr1.length()), :expr2.class.name,"
-                        + " ##(:expr3) WHERE #if(:expr4) {e = :expr4} #else {e IS NULL}"
-                        + "#for(variant in :expr5.bytes) { AND c = :variant}" // NL
-                        + " GROUP BY #!(:expr1) ASC");
+
+        /*ExqlPattern pattern = ExqlPatternImpl.compile("INSERT INTO test (id #for(key in :keyValue.keySet()){ ,`##(:key)`}) VALUES (null #for(key in :keyValue.keySet()){ ,'##(:keyValue[:key])'})");
+        ExqlContext context = new ExqlContextImpl(1024);
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> keyValue = new HashMap<>();
+        keyValue.put("id1",1);
+        keyValue.put("id2",2);
+        keyValue.put("id3",3);
+        map.put("keyValue",keyValue);*/
+
+        ExqlPattern pattern = ExqlPatternImpl.compile(
+                "INSERT INTO role_table ( id ) VALUES " +
+                        "#for(keyValue in :keyValues){" +
+                            " (#for(key in :keyValue.keySet()){" +
+                                " null ,'##(:keyValue[:key])'" +
+                            "  }) " +
+                        "}"
+        );
 
         ExqlContext context = new ExqlContextImpl(1024);
 
         HashMap<String, Object> map = new HashMap<String, Object>();
+        List<Map<String, Object>> keyValues = new ArrayList<>();
+        HashMap<String, Object> map1 = new HashMap<>();
+        keyValues.add(map1);
+        map1.put("id", "1");
+        map1.put("id2", "2");
+        map1.put("id3", "3");
 
-        map.put("expr1", "expr1");
-        map.put("expr2", "expr2");
-        map.put("expr3", "expr3");
-        map.put("expr4", "expr4");
-        map.put("expr5", "expr5");
+        HashMap<String, Object> map2 = new HashMap<>();
+        keyValues.add(map2);
+        map2.put("id", "1");
+        map2.put("id2", "2");
+        map2.put("id3", "3");
+
+        map.put("keyValues", keyValues);
+
 
         System.out.println(pattern.execute(context, map));
         System.out.println(Arrays.toString(context.getParams()));

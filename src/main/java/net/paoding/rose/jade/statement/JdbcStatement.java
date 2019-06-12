@@ -160,7 +160,6 @@ public class JdbcStatement implements Statement {
                 sb.append(key).append("='").append(parameters.get(key)).append("'  ");
             }
             sb.append("\n\t$sql:\t").append(runtime.getSQL());
-            sb.append("\n\t$args:\t").append(argsAsString);
             String[] splitSql = sql.toString().split("\\?");
             if (!ObjectUtils.isEmpty(splitSql) && !ObjectUtils.isEmpty(args) && splitSql.length == args.length) {
                 sql = new StringBuilder();

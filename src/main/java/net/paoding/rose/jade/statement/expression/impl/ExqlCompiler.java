@@ -12,7 +12,7 @@ import net.paoding.rose.jade.statement.expression.ExqlUnit;
 
 /**
  * 实现语句编译器。
- * 
+ *
  * @author han.liao
  */
 public class ExqlCompiler {
@@ -53,7 +53,7 @@ public class ExqlCompiler {
 
     /**
      * 创建语句编译器。
-     * 
+     *
      * @param pattern - 待编译的语句
      */
     public ExqlCompiler(String pattern) {
@@ -63,7 +63,7 @@ public class ExqlCompiler {
 
     /**
      * 执行编译动作。
-     * 
+     *
      * @return ExqlPattern 对象
      */
     public ExqlPattern compile() {
@@ -74,8 +74,7 @@ public class ExqlCompiler {
 
     /**
      * 从语句编译出: ExqlUnit 对象。
-     * 
-     * 
+     *
      * @return ExqlUnit 对象
      */
     protected ExqlUnit compileUnit() {
@@ -270,12 +269,11 @@ public class ExqlCompiler {
 
     /**
      * 查找匹配的左括号, 忽略之前的空白字符。
-     * 
+     * <p>
      * 如果未找到匹配的左括号，函数返回 -1.
-     * 
-     * @param chLeft - 匹配的左括号
+     *
+     * @param chLeft    - 匹配的左括号
      * @param fromIndex - 查找的起始位置
-     * 
      * @return 左括号的位置, 如果未找到匹配的左括号，函数返回 -1.
      */
     private int findLeftBrace(char chLeft, int fromIndex) {
@@ -301,14 +299,12 @@ public class ExqlCompiler {
 
     /**
      * 查找匹配的右括号, 可以用于匹配 '{}', '[]', '()' 括号对。
-     * 
+     * <p>
      * 如果未找到匹配的右括号，函数返回 -1.
-     * 
-     * @param string - 查找的字符串
-     * @param chLeft - 匹配的左括号
-     * @param chRight - 匹配的右括号
+     *
+     * @param chLeft    - 匹配的左括号
+     * @param chRight   - 匹配的右括号
      * @param fromIndex - 查找的起始位置
-     * 
      * @return 右括号的位置, 如果未找到匹配的右括号，函数返回 -1.
      */
     private int findRightBrace(char chLeft, char chRight, int fromIndex) {
@@ -342,12 +338,11 @@ public class ExqlCompiler {
 
     /**
      * 从当前位置查找匹配的一对括号, 并返回内容。
-     * 
+     * <p>
      * 如果有匹配的括号, 返回后的当前位置指向匹配的右括号后一个字符。
-     * 
-     * @param chLeft - 匹配的左括号
+     *
+     * @param chLeft  - 匹配的左括号
      * @param chRight - 匹配的右括号
-     * 
      * @return 返回括号内容, 如果没有括号匹配, 返回 <code>null</code>.
      */
     private String findBrace(char chLeft, char chRight) {
@@ -373,9 +368,9 @@ public class ExqlCompiler {
 
     /**
      * 从当前位置查找匹配的: {...} 并编译出: ExqlUnit 对象。
-     * 
+     * <p>
      * 如果有匹配的: {...}, 编译后, 当前位置指向匹配的右括号后一个字符。
-     * 
+     *
      * @return ExqlUnit, 如果没有: {...} 匹配, 返回 <code>null</code>.
      */
     private ExqlUnit compileBlock() {
@@ -394,12 +389,11 @@ public class ExqlCompiler {
 
     /**
      * 匹配指定的关键字。
-     * 
+     * <p>
      * 如果匹配成功, 当前位置是关键字最后一个字符之后。
-     * 
-     * @param keyword - 匹配的关键字
+     *
+     * @param keyword   - 匹配的关键字
      * @param fromIndex - 查找的起始位置
-     * 
      * @return true / false
      */
     private boolean match(String keyword, int fromIndex) {
