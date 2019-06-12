@@ -119,8 +119,7 @@ public class StatementMetaData {
                     String toString = StatementMetaData.this.method.toString();
                     int paramStart = toString.indexOf("(");
                     int methodNameStart = toString.lastIndexOf('.', paramStart) + 1;
-                    return toString.substring(methodNameStart) + "@" //
-                            + StatementMetaData.this.method.getDeclaringClass().getName();
+                    return toString.substring(methodNameStart) + "@" + StatementMetaData.this.method.getDeclaringClass().getName();
                 }
 
                 @Override
@@ -201,13 +200,12 @@ public class StatementMetaData {
         return sqlType;
     }
     
-    protected SQLType resolveSQLType(SQL sql) {
+    private SQLType resolveSQLType(SQL sql) {
         SQLType sqlType = sql.type();
         if (sqlType == SQLType.AUTO_DETECT) {
-            for (int i = 0; i < SELECT_PATTERNS.length; i++) {
+            for (Pattern selectPattern : SELECT_PATTERNS) {
                 // 用正则表达式匹配 SELECT 语句
-                if (SELECT_PATTERNS[i].matcher(getSQL()).find() //
-                        || SELECT_PATTERNS[i].matcher(getMethod().getName()).find()) {
+                if (selectPattern.matcher(getSQL()).find() || selectPattern.matcher(getMethod().getName()).find()) {
                     sqlType = SQLType.READ;
                     break;
                 }
@@ -239,15 +237,14 @@ public class StatementMetaData {
     }
 
     private static Pattern[] SELECT_PATTERNS = new Pattern[] {
-            //
-            Pattern.compile("^\\s*SELECT.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*GET.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*FIND.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*READ.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*QUERY.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*SHOW.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*DESC.*", Pattern.CASE_INSENSITIVE), //
-            Pattern.compile("^\\s*DESCRIBE.*", Pattern.CASE_INSENSITIVE), //
+            Pattern.compile("^\\s*SELECT.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*GET.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*FIND.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*READ.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*QUERY.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*SHOW.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*DESC.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^\\s*DESCRIBE.*", Pattern.CASE_INSENSITIVE),
     };
 
 }
