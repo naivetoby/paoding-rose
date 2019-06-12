@@ -5,7 +5,7 @@
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>paoding-rose-jade</name>
 
     <parent>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>cn.zhangfusheng</groupId>
             <artifactId>paod-rose-load</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
