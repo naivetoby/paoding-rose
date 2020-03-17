@@ -66,7 +66,7 @@ public class SelectQuerier implements Querier {
     }
 
     public Object execute(SQLType sqlType, StatementRuntime runtime) {
-        DataAccess dataAccess = dataAccessProvider.getDataAccess(//
+        DataAccess dataAccess = dataAccessProvider.getDataAccess(
                 runtime.getMetaData(), runtime.getProperties());
         // 执行查询
         List<?> listResult = dataAccess.select(runtime.getSQL(), runtime.getArgs(), rowMapper);
