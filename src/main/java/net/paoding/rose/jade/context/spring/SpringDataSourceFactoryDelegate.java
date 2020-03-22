@@ -31,15 +31,18 @@ public class SpringDataSourceFactoryDelegate implements DataSourceFactory {
         if (dataSourceFactoryMap.containsKey(catalog)) {
             dataSourceFactory = dataSourceFactoryMap.get(catalog);
         } else {
-            String beanName = StringUtils.isEmpty(catalog) ? "jade.dataSourceFactory" : "jade.dataSourceFactory." + catalog;
+            String beanName = "jade.dataSourceFactory";
+            String catlogBeanName = StringUtils.isEmpty(catalog) ? null : beanName + "." + catalog;
             ListableBeanFactory beanFactory = this.beanFactory;
             if (beanFactory != null) {
-                if (beanFactory.containsBeanDefinition(beanName)) {
+                if (beanFactory.containsBeanDefinition(catlogBeanName)) {
+                    dataSourceFactory = beanFactory.getBean(catlogBeanName, DataSourceFactory.class);
+                } else if (beanFactory.containsBeanDefinition(beanName)) {
                     dataSourceFactory = beanFactory.getBean(beanName, DataSourceFactory.class);
                 } else {
                     dataSourceFactory = new SpringDataSourceFactory(beanFactory);
                 }
-                dataSourceFactoryMap.put(beanName, dataSourceFactory);
+                dataSourceFactoryMap.put(catalog, dataSourceFactory);
             }
         }
         assert dataSourceFactory != null;
