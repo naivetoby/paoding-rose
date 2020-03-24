@@ -28,11 +28,12 @@ public class SpringDataSourceFactoryDelegate implements DataSourceFactory {
         Class<?> daoClass = metaData.getDAOMetaData().getDAOClass();
         String catalog = daoClass.getAnnotation(DAO.class).catalog();
         DataSourceFactory dataSourceFactory = null;
-        if (dataSourceFactoryMap.containsKey(catalog)) {
-            dataSourceFactory = dataSourceFactoryMap.get(catalog);
+        String key = daoClass.getName() + "-" + metaData.getSQLType();
+        if (dataSourceFactoryMap.containsKey(key)) {
+            dataSourceFactory = dataSourceFactoryMap.get(key);
         } else {
             String beanName = "jade.dataSourceFactory";
-            String catlogBeanName = StringUtils.isEmpty(catalog) ? null : beanName + "." + catalog;
+            String catlogBeanName = StringUtils.isEmpty(catalog) ? beanName : beanName + "." + catalog;
             ListableBeanFactory beanFactory = this.beanFactory;
             if (beanFactory != null) {
                 if (beanFactory.containsBeanDefinition(catlogBeanName)) {
@@ -42,7 +43,7 @@ public class SpringDataSourceFactoryDelegate implements DataSourceFactory {
                 } else {
                     dataSourceFactory = new SpringDataSourceFactory(beanFactory);
                 }
-                dataSourceFactoryMap.put(catalog, dataSourceFactory);
+                dataSourceFactoryMap.put(key, dataSourceFactory);
             }
         }
         assert dataSourceFactory != null;
