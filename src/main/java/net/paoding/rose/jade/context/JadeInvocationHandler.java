@@ -15,35 +15,24 @@
  */
 package net.paoding.rose.jade.context;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import net.paoding.rose.jade.annotation.DAO;
 import net.paoding.rose.jade.annotation.SQLParam;
 import net.paoding.rose.jade.annotation.SQLType;
 import net.paoding.rose.jade.dataaccess.DataAccessFactory;
+import net.paoding.rose.jade.excetion.JadeExcetion;
 import net.paoding.rose.jade.rowmapper.RowMapperFactory;
-import net.paoding.rose.jade.statement.DAOMetaData;
-import net.paoding.rose.jade.statement.Interpreter;
-import net.paoding.rose.jade.statement.InterpreterFactory;
-import net.paoding.rose.jade.statement.JdbcStatement;
-import net.paoding.rose.jade.statement.Querier;
-import net.paoding.rose.jade.statement.SelectQuerier;
-import net.paoding.rose.jade.statement.Statement;
-import net.paoding.rose.jade.statement.StatementMetaData;
-import net.paoding.rose.jade.statement.StatementWrapperProvider;
-import net.paoding.rose.jade.statement.UpdateQuerier;
+import net.paoding.rose.jade.statement.*;
 import net.paoding.rose.jade.statement.cached.CacheProvider;
 import net.paoding.rose.jade.statement.cached.CachedStatement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author 王志亮 [qieqie.wang@gmail.com]
@@ -110,7 +99,11 @@ public class JadeInvocationHandler implements InvocationHandler {
                 parameters.put(INDEX_NAMES[i], args[i]);
                 SQLParam sqlParam = statemenetMetaData.getSQLParamAt(i);
                 if (sqlParam != null) {
-                    parameters.put(sqlParam.value(), args[i]);
+                    String value = sqlParam.value();
+                    if ("index".equals(value)) {
+                        throw new JadeExcetion("SQLParam value equals index,Please set other values!");
+                    }
+                    parameters.put(value, args[i]);
                 }
             }
         }

@@ -35,4 +35,11 @@ public interface ExprResolver {
      * @throws Exception
      */
     Object executeExpr(String expression) throws Exception;
+
+    /**
+     * 设置上下文
+     * @param key   key
+     * @param value value
+     */
+    public void setContext(String key, Object value);
 }

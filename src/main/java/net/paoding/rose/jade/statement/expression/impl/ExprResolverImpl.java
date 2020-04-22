@@ -1,5 +1,12 @@
 package net.paoding.rose.jade.statement.expression.impl;
 
+import net.paoding.rose.jade.statement.expression.ExprResolver;
+import org.apache.commons.jexl.Expression;
+import org.apache.commons.jexl.ExpressionFactory;
+import org.apache.commons.jexl.JexlContext;
+import org.apache.commons.jexl.JexlHelper;
+import org.apache.commons.lang.math.NumberUtils;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,17 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.paoding.rose.jade.statement.expression.ExprResolver;
-
-import org.apache.commons.jexl.Expression;
-import org.apache.commons.jexl.ExpressionFactory;
-import org.apache.commons.jexl.JexlContext;
-import org.apache.commons.jexl.JexlHelper;
-import org.apache.commons.lang.math.NumberUtils;
-
 /**
  * 默认使用: Apache Common Jexl 引擎实现表达式处理。
- * 
  * @author han.liao
  */
 public class ExprResolverImpl implements ExprResolver {
@@ -28,11 +26,9 @@ public class ExprResolverImpl implements ExprResolver {
     // 正则表达式
     //private static final Pattern PREFIX_PATTERN = Pattern.compile( // NL
     //"(\\:|\\$)([a-zA-Z0-9_]+)(\\.[a-zA-Z0-9_]+)*");
-    private static final Pattern PREFIX_PATTERN = Pattern.compile( // NL
-    "(\\:|\\$)([a-zA-Z0-9_]+)(\\.[a-zA-Z0-9_]+)*");
+    private static final Pattern PREFIX_PATTERN = Pattern.compile("(\\:|\\$)([a-zA-Z0-9_]+)(\\.[a-zA-Z0-9_]+)*");
 
-    private static final Pattern MAP_PATTERN = Pattern.compile( // NL
-            "\\[([\\.a-zA-Z0-9_]+)\\]");
+    private static final Pattern MAP_PATTERN = Pattern.compile("\\[([\\.a-zA-Z0-9_]+)\\]");
 
     // 常量前缀
     private static final String CONST_PREFIX = "_mapConsts";
@@ -54,14 +50,13 @@ public class ExprResolverImpl implements ExprResolver {
      */
     @SuppressWarnings("unchecked")
     public ExprResolverImpl() {
-        Map map = context.getVars();
+        Map<Object, Object> map = context.getVars();
         map.put(VAR_PREFIX, mapVars);
         map.put(CONST_PREFIX, mapConsts);
     }
 
     /**
      * 构造表达式处理器。
-     * 
      * @param mapVars - 初始的参数表
      */
     public ExprResolverImpl(Map<String, ?> mapVars) {
@@ -71,8 +66,7 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 构造表达式处理器。
-     * 
-     * @param mapVars - 初始的参数表
+     * @param mapVars   - 初始的参数表
      * @param mapConsts - 初始的常量表
      */
     public ExprResolverImpl(Map<String, ?> mapVars, Map<String, ?> mapConsts) {
@@ -81,9 +75,20 @@ public class ExprResolverImpl implements ExprResolver {
         this.mapConsts.putAll(mapConsts);
     }
 
+
+    /**
+     * 设置上下文
+     * @param key   key
+     * @param value value
+     */
+    @Override
+    public void setContext(String key, Object value) {
+        //noinspection unchecked
+        context.getVars().put(key, value);
+    }
+
     /**
      * 返回表达式处理器的参数表。
-     * 
      * @return 处理器的参数表
      */
     public Map<String, ?> getVars() {
@@ -92,7 +97,6 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 设置表达式处理器的参数表。
-     * 
      * @param map - 处理器的参数表
      */
     public void setVars(Map<String, ?> map) {
@@ -101,7 +105,6 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 返回表达式处理器的常量表。
-     * 
      * @return 处理器的常量表
      */
     public Map<String, ?> getConstants() {
@@ -110,7 +113,6 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 设置表达式处理器的常量表。
-     * 
      * @param map - 处理器的常量表
      */
     public void setConstants(Map<String, ?> map) {
@@ -131,7 +133,7 @@ public class ExprResolverImpl implements ExprResolver {
             Matcher mapMatcher = MAP_PATTERN.matcher(expression);
             int index = 0;
             while (mapMatcher.find()) {
-                builder.append(expression.substring(index, mapMatcher.start()));
+                builder.append(expression, index, mapMatcher.start());
                 String t = mapMatcher.group(1);
                 if (!NumberUtils.isDigits(t)) {
                     builder.append("['");
@@ -224,13 +226,13 @@ public class ExprResolverImpl implements ExprResolver {
         Map<String, Object> map = new HashMap<String, Object>();
 
         map.put("current", new Date());
-        map.put("numbers", new Integer[] { 1, 2, 3, 5, 8, 13, 21, 34 });
+        map.put("numbers", new Integer[]{1, 2, 3, 5, 8, 13, 21, 34});
         map.put("index", 5);
         map.put(":2", 2);
         map.put("map", map);
 
         ExprResolver exprResolver = new ExprResolverImpl(map, map);
-        
+
 
         System.out.println("map['index']=" +  // NL
                 exprResolver.executeExpr(":map[index]"));

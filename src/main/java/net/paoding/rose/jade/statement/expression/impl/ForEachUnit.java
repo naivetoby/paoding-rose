@@ -7,7 +7,6 @@ import net.paoding.rose.jade.statement.expression.util.ExqlUtils;
 
 /**
  * 循环输出子单元内容的语句单元, 例如: '#for (variant in :expr) {...}' 形式的语句。
- * 
  * @author han.liao
  */
 public class ForEachUnit implements ExqlUnit {
@@ -20,10 +19,9 @@ public class ForEachUnit implements ExqlUnit {
 
     /**
      * 构造循环输出的语句单元。
-     * 
-     * @param expr - 集合表达式
+     * @param expr    - 集合表达式
      * @param variant - 循环临时变量名
-     * @param unit - 需要循环输出的单元
+     * @param unit    - 需要循环输出的单元
      */
     public ForEachUnit(String expr, String variant, ExqlUnit unit) {
         this.expr = expr;
@@ -63,21 +61,21 @@ public class ForEachUnit implements ExqlUnit {
             }
 
         } else {
-
-            // 备份原变量 
+            // 索引
+            int index = 0;
+            exprResolver.setContext("index", index);
+            // 备份原变量
             Object variantValue = exprResolver.getVar(variant);
-
             for (Object value : ExqlUtils.asCollection(obj)) {
-
+                exprResolver.setContext("index", index++);
                 // 写入循环临时变量
                 exprResolver.setVar(variant, value);
-
                 // 输出循环单元
                 unit.fill(exqlContext, exprResolver);
             }
-
             // 恢复备份变量
             exprResolver.setVar(variant, variantValue);
+
         }
     }
 }
