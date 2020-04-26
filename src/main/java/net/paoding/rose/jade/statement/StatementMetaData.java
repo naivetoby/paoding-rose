@@ -19,19 +19,15 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
-import net.paoding.rose.jade.annotation.SQL;
-import net.paoding.rose.jade.annotation.SQLParam;
-import net.paoding.rose.jade.annotation.SQLType;
-import net.paoding.rose.jade.annotation.ShardBy;
+import net.paoding.rose.jade.annotation.*;
+import net.paoding.rose.jade.annotation.condition.SQLCondition;
 
 /**
  * {@link StatementMetaData} 封装、缓存了一个DAO方法的相关信息
  * <p>
- * 
- * 
  * @author 王志亮 [qieqie.wang@gmail.com]
  */
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({"rawtypes"})
 public class StatementMetaData {
 
     /**
@@ -48,7 +44,7 @@ public class StatementMetaData {
      * DAO方法上的原始SQL语句，如果没有执行SQL语句，则根据方法签名生成相应的串辅助debug
      */
     private final String sql;
-    
+
     /**
      * SQL类型（查询类型或者更新类型）：默认由方法名和SQL语句判断，除非强制指定。
      * @see SQLType
@@ -57,24 +53,24 @@ public class StatementMetaData {
 
     /**
      * DAO方法的“最低返回类型”。
-     * <P>
+     * <p>
      * 大部分情况returnType和method.getReturnType是相同的，但对于一些声明为泛型的返回类型，
      * Jade会尽量提取出实际的类型作为returnType
-     * <P>
+     * <p>
      * 比如：
-     * 
+     *
      * <pre>
      * //@DAO、@SQL注解从略
      * public interface BaseDAO[E] {
-     * 
+     *
      *     public E getById(Long id);
-     * 
+     *
      * }
      * public interface UserDAO extends BaseDAO[User] {
-     * 
+     *
      * }
      * </pre>
-     * 
+     * <p>
      * 此时，UserDAO#getById方法的returnType是User，而非Object;
      */
     private final Class returnType;
@@ -90,6 +86,8 @@ public class StatementMetaData {
      * 此数组的长度为方法的参数个数，如果对应位置的方法参数没有注解 {@link SQLParam},该位置的元素值为null
      */
     private final SQLParam[] sqlParams;
+
+    private final SQLCondition[] sqlConditions;
 
     /**
      * <code>@{@link ShardBy}</code>标注在哪个参数上？(从0开始，负数代表无)－从method中获取并缓存
@@ -126,9 +124,15 @@ public class StatementMetaData {
                 public SQLType type() {
                     return SQLType.AUTO_DETECT;
                 }
+
+                @Override
+                public SQLCondition[] condition() {
+                    return new SQLCondition[0];
+                }
             };
         }
         this.sql = sqlAnnotation.value();
+        this.sqlConditions = sqlAnnotation.condition();
         this.sqlType = resolveSQLType(sqlAnnotation);
 
         this.returnType = GenericUtils.getReturnType(this);
@@ -172,6 +176,10 @@ public class StatementMetaData {
         return sql;
     }
 
+    public SQLCondition[] getSqlConditions() {
+        return this.sqlConditions;
+    }
+
     public int getParameterCount() {
         return parameterCount;
     }
@@ -195,11 +203,11 @@ public class StatementMetaData {
     public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
         return method.getAnnotation(annotationClass);
     }
-    
+
     public SQLType getSQLType() {
         return sqlType;
     }
-    
+
     private SQLType resolveSQLType(SQL sql) {
         SQLType sqlType = sql.type();
         if (sqlType == SQLType.AUTO_DETECT) {
@@ -236,7 +244,7 @@ public class StatementMetaData {
         return daoMetaData.getDAOClass().getName() + '#' + method.getName();
     }
 
-    private static Pattern[] SELECT_PATTERNS = new Pattern[] {
+    private static Pattern[] SELECT_PATTERNS = new Pattern[]{
             Pattern.compile("^\\s*SELECT.*", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^\\s*GET.*", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^\\s*FIND.*", Pattern.CASE_INSENSITIVE),

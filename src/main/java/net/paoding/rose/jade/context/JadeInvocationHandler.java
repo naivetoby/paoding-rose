@@ -112,10 +112,10 @@ public class JadeInvocationHandler implements InvocationHandler {
     }
 
     private Statement getStatement(Method method) {
-        Statement statement = statements.get(method);
+        Statement statement = null;//statements.get(method);
         if (statement == null) {
             synchronized (method) {
-                statement = statements.get(method);
+                statement = null;//statements.get(method);
                 if (statement == null) {
                     StatementMetaData smd = new StatementMetaData(daoMetaData, method);
                     SQLType sqlType = smd.getSQLType();

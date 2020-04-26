@@ -323,3 +323,80 @@ public class SortBy {
     private String sortOrder = DESC;
 }
 ```
+* 2.0 调整@SQL注解,添加SQLCondition注解,具体用法如下
+```java
+        // SELECT_SQL 为BaseDAO中提取的公共的sql模板
+        final static String TABLE_NAME = "tb_user";
+        final static String SELECT_COLUMN = "`id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`";
+    
+        /**
+         * 产生sql:
+         * select `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+         * from `tb_user`
+         * where user_name = '123' and phone = '456' and id in (1001) or province_id=1 or (province_id=1 or id in (1001))
+         * @param tbUser
+         * @return
+         */
+        @SQL(
+                value = SELECT_SQL,
+                condition = {
+                        @SQLCondition("#if(:vo.userName!=null){user_name = :vo.userName}"),
+                        @SQLCondition("#if(:vo.phone!=null){phone = :vo.phone}"),
+                        @SQLCondition("#if(:vo.id!=null){id in (:vo.id)}"),
+                        @SQLCondition(value = "#if(:vo.provinceId!=null){province_id=:vo.provinceId}", condition = "or"),
+                        @SQLCondition(value = "#if(:vo.provinceId!=null){(province_id=:vo.provinceId or id in (:vo.id))}", condition = "or"),
+                }
+        )
+        List<TbUser> find(@SQLParam("vo") TbUser tbUser);
+    
+    
+        /**
+         * 产生sql
+         * select
+         * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+         * from `tb_user`
+         * where id in (1,2,3,4,5)
+         * @param ids
+         * @return
+         */
+        @SQL(
+                value = SELECT_SQL, condition = {
+                @SQLCondition("#if(:1!=null){id in (:1)}"),
+        })
+        List<TbUser> findByIds(List<Integer> ids);
+    
+        /**
+         * 产生sql:
+         * select
+         * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+         * from `tb_user`
+         * where
+         * user_name in ('1','2','3','4','5')
+         * @param names
+         * @return
+         */
+        @SQL(
+                value = SELECT_SQL, condition = {
+                @SQLCondition("#if(:1!=null){user_name in (:1)}"),
+        })
+        List<TbUser> findByNames(List<String> names);
+    
+        /**
+         * 产生sql:
+         * select
+         * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+         * from `tb_user`
+         * where
+         * id in (1,2,3,4,5) and id in (1,2,3,4,5) and user_name in ('1','2','3','4','5')
+         * @param names
+         * @param ids
+         * @return
+         */
+        @SQL(
+                value = SELECT_SQL,
+                condition = {
+                        @SQLCondition(value = "#if(:2!=null){id in (:2)}", values = {"#if(:2!=null){id in (:2)}", "#if(:1!=null){user_name in (:1)}"})
+                }
+        )
+        List<TbUser> findByNamesAndId(List<String> names, List<Integer> ids);
+```

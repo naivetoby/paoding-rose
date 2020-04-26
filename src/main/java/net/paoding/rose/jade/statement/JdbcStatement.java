@@ -22,6 +22,7 @@ import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
@@ -147,8 +148,7 @@ public class JdbcStatement implements Statement {
     private void log(Map<String, Object> parameters, StatementRuntime runtime) {
         if (sqlLogger.isInfoEnabled()) {
             StringBuilder sql = new StringBuilder(runtime.getSQL());
-            Object[] args = runtime.getArgs();
-            String argsAsString = Arrays.toString(args);
+            List<Object> args = runtime.getArgs();
             StringBuilder sb = new StringBuilder(1024);
             sb.append(logPrefix);
             sb.append("\n\t#SQL:\t").append(runtime.getMetaData().getSQL());
@@ -161,10 +161,10 @@ public class JdbcStatement implements Statement {
             }
             sb.append("\n\t$sql:\t").append(runtime.getSQL());
             String[] splitSql = sql.toString().split("\\?");
-            if (!ObjectUtils.isEmpty(splitSql) && !ObjectUtils.isEmpty(args) && splitSql.length == args.length) {
+            if (!ObjectUtils.isEmpty(splitSql) && !CollectionUtils.isEmpty(args) && splitSql.length == args.size()) {
                 sql = new StringBuilder();
                 for (int i = 0; i < splitSql.length; i++) {
-                    sql.append(splitSql[i]).append("'").append(args[i]).append("'");
+                    sql.append(splitSql[i]).append("'").append(args.get(i)).append("'");
                 }
                 sb.append("\n\tSQL:\t").append(sql);
             }

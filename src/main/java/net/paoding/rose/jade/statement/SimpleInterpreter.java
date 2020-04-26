@@ -27,10 +27,10 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 /**
- * 
  * @author 廖涵 [in355hz@gmail.com]
  */
 //NOTE: 这是一个最简单的解释器（没有表达式功能的解释器），实际并未启用
+@Deprecated
 public class SimpleInterpreter implements Interpreter {
 
     private static final Pattern NAMED_PARAM_PATTERN = Pattern.compile("(\\:([a-zA-Z0-9_\\.]+))");

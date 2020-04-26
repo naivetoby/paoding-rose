@@ -15,14 +15,12 @@
  */
 package net.paoding.rose.jade.statement;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import net.paoding.rose.jade.annotation.condition.SQLCondition;
+
+import java.util.*;
 
 /**
- * 
  * @author qieqie
- * 
  */
 public class StatementRuntimeImpl implements StatementRuntime {
 
@@ -32,7 +30,9 @@ public class StatementRuntimeImpl implements StatementRuntime {
 
     private String sql;
 
-    private Object[] args;
+    private SQLCondition[] sqlCondition;
+
+    private List<Object> args = new ArrayList<>();
 
     private Map<String, Object> properties;
 
@@ -40,6 +40,10 @@ public class StatementRuntimeImpl implements StatementRuntime {
         this.metaData = metaData;
         this.parameters = parameters;
         this.sql = metaData.getSQL();
+        SQLCondition[] sqlConditions = metaData.getSqlConditions();
+        if (sqlConditions != null && sqlConditions.length > 0) {
+            this.sqlCondition = Arrays.asList(sqlConditions).parallelStream().toArray(SQLCondition[]::new);
+        }
     }
 
     @Override
@@ -63,13 +67,15 @@ public class StatementRuntimeImpl implements StatementRuntime {
     }
 
     @Override
-    public Object[] getArgs() {
+    public List<Object> getArgs() {
         return args;
     }
 
     @Override
     public void setArgs(Object[] args) {
-        this.args = args;
+        if (args != null && args.length > 0) {
+            this.args.addAll(Arrays.asList(args));
+        }
     }
 
     @Override
@@ -92,6 +98,16 @@ public class StatementRuntimeImpl implements StatementRuntime {
     @Override
     public <T> T getProperty(String name) {
         return (T) (properties == null ? null : properties.get(name));
+    }
+
+    @Override
+    public void setSQLAnds(SQLCondition[] sqlAnds) {
+        this.sqlCondition = sqlAnds;
+    }
+
+    @Override
+    public SQLCondition[] getSQLAnds() {
+        return this.sqlCondition;
     }
 
 }

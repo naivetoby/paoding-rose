@@ -47,7 +47,7 @@ public interface DataAccess {
      * @param rowMapper 行映射器
      * @return
      */
-    <T> List<T> select(String sql, Object[] args, RowMapper<T> rowMapper);
+    <T> List<T> select(String sql, List<Object> args, RowMapper<T> rowMapper);
 
     /**
      * 写访问（更新或插入）
@@ -57,7 +57,7 @@ public interface DataAccess {
      * @param generatedKeyHolder 是否要读取该SQL生成的key
      * @return
      */
-    int update(String sql, Object[] args, KeyHolder generatedKeyHolder);
+    int update(String sql, List<Object> args, KeyHolder generatedKeyHolder);
 
     /**
      * 批量写访问（更新或插入）

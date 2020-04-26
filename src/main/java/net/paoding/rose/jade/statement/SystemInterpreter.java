@@ -15,33 +15,68 @@
  */
 package net.paoding.rose.jade.statement;
 
-import java.sql.SQLSyntaxErrorException;
-import java.util.HashMap;
-import java.util.Map;
-
+import net.paoding.rose.jade.annotation.condition.SQLCondition;
 import net.paoding.rose.jade.statement.expression.ExqlPattern;
 import net.paoding.rose.jade.statement.expression.impl.ExqlContextImpl;
 import net.paoding.rose.jade.statement.expression.impl.ExqlPatternImpl;
-
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.util.StringUtils;
+
+import java.sql.SQLSyntaxErrorException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
- * 
  * @author 廖涵 [in355hz@gmail.com]
  */
 public class SystemInterpreter implements Interpreter {
 
     @Override
     public void interpret(StatementRuntime runtime) {
-        // 转换语句中的表达式
-        ExqlPattern pattern = ExqlPatternImpl.compile(runtime.getSQL());
-        ExqlContextImpl context = new ExqlContextImpl(runtime.getSQL().length() + 32);
-
         try {
-            pattern.execute(context, runtime.getParameters(), runtime.getMetaData()
-                    .getDAOMetaData().getConstants());
+
+            ExqlContextImpl context = new ExqlContextImpl(runtime.getSQL().length() + 32);
+            Map<String, Object> parameters = runtime.getParameters();
+            Map<String, ?> constants = runtime.getMetaData().getDAOMetaData().getConstants();
+            // 转换语句中的表达式
+            ExqlPattern pattern = ExqlPatternImpl.compile(runtime.getSQL());
+            pattern.execute(context, parameters, constants);
             runtime.setArgs(context.getParams());
-            runtime.setSQL(context.flushOut());
+            StringBuilder sql = new StringBuilder(context.flushOut());
+            // 转换 and 表达式
+            SQLCondition[] sqlConditions = runtime.getSQLAnds();
+            boolean appendWhere = true, appendCondition = true;
+            for (SQLCondition sqlCondition : sqlConditions) {
+                String value = sqlCondition.value();
+                String condition = sqlCondition.condition();
+                String[] values = sqlCondition.values();
+                ArrayList<String> valueList = new ArrayList<>(values.length + 1);
+                valueList.add(value);
+                valueList.addAll(Arrays.asList(values));
+                for (String expression : valueList) {
+                    if (!StringUtils.isEmpty(expression)) {
+                        ExqlPattern sqlAndPattern = ExqlPatternImpl.compile(expression);
+                        ExqlContextImpl sqlAndContext = new ExqlContextImpl(expression.length() + 32);
+                        sqlAndPattern.execute(sqlAndContext, parameters, constants);
+                        String sqlConditionStr = sqlAndContext.flushOut();
+                        if (sqlConditionStr != null && sqlConditionStr.length() > 0) {
+                            if (appendWhere) {
+                                sql.append(" where ");
+                                appendWhere = false;
+                            }
+                            if (appendCondition) {
+                                sql.append(sqlConditionStr);
+                                appendCondition = false;
+                            } else {
+                                sql.append(" ").append(condition).append(" ").append(sqlConditionStr);
+                            }
+                            runtime.setArgs(sqlAndContext.getParams());
+                        }
+                    }
+                }
+            }
+            runtime.setSQL(sql.toString());
         } catch (Exception e) {
             String daoInfo = runtime.getMetaData().toString();
             throw new BadSqlGrammarException(daoInfo, runtime.getSQL(),
@@ -50,20 +85,5 @@ public class SystemInterpreter implements Interpreter {
 
     }
 
-    public static void main(String[] args) throws Exception {
-        // 转换语句中的表达式
-        String sql = "insert ignore into table_name "
-                + "(`id`,`uid`,`favable_id`,`addtime`,`ranking`) "//
-                + "values (:1,:2,now(),0)";
-        ExqlPattern pattern = ExqlPatternImpl.compile(sql);
-        ExqlContextImpl context = new ExqlContextImpl(sql.length() + 32);
-
-        Map<String, Object> parametersAsMap = new HashMap<String, Object>();
-        parametersAsMap.put(":1", "p1");
-        parametersAsMap.put(":2", "p2");
-
-        String result = pattern.execute(context, parametersAsMap);
-        System.out.println(result);
-    }
 
 }

@@ -128,7 +128,8 @@ public class UpdateQuerier implements Querier {
                 batch = new LinkedList<StatementRuntime>();
                 batchs.put(runtime.getSQL(), batch);
             }
-            runtime.setProperty("_index_at_batch_", i); // 该runtime在batch中的位置
+            // 该runtime在batch中的位置
+            runtime.setProperty("_index_at_batch_", i);
             batch.add(runtime);
         }
         // TODO: 多个真正的batch可以考虑并行执行~待定
@@ -136,11 +137,11 @@ public class UpdateQuerier implements Querier {
             String sql = batch.getKey();
             List<StatementRuntime> batchRuntimes = batch.getValue();
             StatementRuntime runtime = batchRuntimes.get(0);
-            DataAccess dataAccess = dataAccessProvider.getDataAccess(//
+            DataAccess dataAccess = dataAccessProvider.getDataAccess(
                     runtime.getMetaData(), runtime.getProperties());
-            List<Object[]> argsList = new ArrayList<Object[]>(batchRuntimes.size());
+            List<Object[]> argsList = new ArrayList<>(batchRuntimes.size());
             for (StatementRuntime batchRuntime : batchRuntimes) {
-                argsList.add(batchRuntime.getArgs());
+                argsList.add(batchRuntime.getArgs().parallelStream().toArray());
             }
             int[] batchResult = dataAccess.batchUpdate(sql, argsList);
             if (batchs.size() == 1) {

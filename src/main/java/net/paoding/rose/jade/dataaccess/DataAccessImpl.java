@@ -43,13 +43,13 @@ public class DataAccessImpl implements DataAccess {
     }
 
     @Override
-    public <T> List<T> select(String sql, Object[] args, RowMapper<T> rowMapper) {
+    public <T> List<T> select(String sql, List<Object> args, RowMapper<T> rowMapper) {
         PreparedStatementCreator csc = getPreparedStatementCreator(sql, args, false);
         return jdbcTemplate.query(csc, new RowMapperResultSetExtractor<T>(rowMapper));
     }
 
     @Override
-    public int update(String sql, Object[] args, KeyHolder generatedKeyHolder) {
+    public int update(String sql, List<Object> args, KeyHolder generatedKeyHolder) {
         boolean returnKeys = generatedKeyHolder != null;
         PreparedStatementCreator psc = getPreparedStatementCreator(sql, args, returnKeys);
         if (generatedKeyHolder == null) {
@@ -64,7 +64,7 @@ public class DataAccessImpl implements DataAccess {
         return jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
-    private PreparedStatementCreator getPreparedStatementCreator(String sql, Object[] args, boolean returnKeys) {
+    private PreparedStatementCreator getPreparedStatementCreator(String sql, List<Object> args, boolean returnKeys) {
         return con -> {
             PreparedStatement ps = con.prepareStatement(sql);
             if (returnKeys) {
@@ -72,8 +72,8 @@ public class DataAccessImpl implements DataAccess {
             }
 
             if (args != null) {
-                for (int i = 0; i < args.length; i++) {
-                    Object arg = args[i];
+                for (int i = 0; i < args.size(); i++) {
+                    Object arg = args.get(i);
                     if (arg instanceof SqlParameterValue) {
                         SqlParameterValue paramValue = (SqlParameterValue) arg;
                         StatementCreatorUtils.setParameterValue(ps, i + 1, paramValue, paramValue.getValue());
