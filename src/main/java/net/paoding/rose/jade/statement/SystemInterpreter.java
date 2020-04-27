@@ -20,7 +20,7 @@ import net.paoding.rose.jade.statement.expression.ExqlPattern;
 import net.paoding.rose.jade.statement.expression.impl.ExqlContextImpl;
 import net.paoding.rose.jade.statement.expression.impl.ExqlPatternImpl;
 import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
@@ -61,12 +61,12 @@ public class SystemInterpreter implements Interpreter {
                     valueList.add(value);
                     valueList.addAll(Arrays.asList(values));
                     for (String expression : valueList) {
-                        if (!StringUtils.isEmpty(expression)) {
+                        if (StringUtils.isNotBlank(expression)) {
                             sqlAndPattern = ExqlPatternImpl.compile(expression);
                             sqlAndContext = new ExqlContextImpl(expression.length() + 32);
                             sqlAndPattern.execute(sqlAndContext, parameters, constants);
                             String sqlConditionStr = sqlAndContext.flushOut();
-                            if (sqlConditionStr != null && sqlConditionStr.length() > 0) {
+                            if (StringUtils.isNotBlank(sqlConditionStr)) {
                                 if (appendWhere) {
                                     sql.append(" where ");
                                     appendWhere = false;
