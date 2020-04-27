@@ -46,19 +46,24 @@ public class SystemInterpreter implements Interpreter {
             StringBuilder sql = new StringBuilder(context.flushOut());
             // 转换 and 表达式
             SQLCondition[] sqlConditions = runtime.getSQLAnds();
-            if(sqlConditions != null && sqlConditions.length>0){
+            if (sqlConditions != null && sqlConditions.length > 0) {
+                String value, condition;
+                String[] values;
+                ArrayList<String> valueList;
+                ExqlPattern sqlAndPattern;
+                ExqlContextImpl sqlAndContext;
                 boolean appendWhere = true, appendCondition = true;
                 for (SQLCondition sqlCondition : sqlConditions) {
-                    String value = sqlCondition.value();
-                    String condition = sqlCondition.condition();
-                    String[] values = sqlCondition.values();
-                    ArrayList<String> valueList = new ArrayList<>(values.length + 1);
+                    value = sqlCondition.value();
+                    condition = sqlCondition.condition();
+                    values = sqlCondition.values();
+                    valueList = new ArrayList<>(values.length + 1);
                     valueList.add(value);
                     valueList.addAll(Arrays.asList(values));
                     for (String expression : valueList) {
                         if (!StringUtils.isEmpty(expression)) {
-                            ExqlPattern sqlAndPattern = ExqlPatternImpl.compile(expression);
-                            ExqlContextImpl sqlAndContext = new ExqlContextImpl(expression.length() + 32);
+                            sqlAndPattern = ExqlPatternImpl.compile(expression);
+                            sqlAndContext = new ExqlContextImpl(expression.length() + 32);
                             sqlAndPattern.execute(sqlAndContext, parameters, constants);
                             String sqlConditionStr = sqlAndContext.flushOut();
                             if (sqlConditionStr != null && sqlConditionStr.length() > 0) {
