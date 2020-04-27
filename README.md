@@ -102,7 +102,7 @@ public interface BaseDao<T> {
      */
     @SQL(SELECT_SQL + "#if(:m != null){#for(key in :m.keySet()){#if(index==0){where}#else{#if(index!=0){and}} `##(:key)`=#(:m[:key]) }}" +
             " #if(:s != null && :s.columnName!=null && :s.sortOrder!=null){order by ##(:s.columnName) ##(:s.sortOrder)}" +
-            " #if(:pageRequest != null){LIMIT :pageRequest.startNum,:pageRequest.endNum}")
+            " #if(:pageRequest != null){LIMIT :pageRequest.startNum,:pageRequest.pageSize}")
     List<T> queryForPage(
             @SQLParam("m") Map<String, Object> queryMap, @SQLParam("pageRequest") PageRequest pageRequest, @SQLParam("s") SortBy sortBy);
 
@@ -229,11 +229,6 @@ public class PageRequest {
     @ApiModelProperty(hidden = true)
     private int endPage;
     /**
-     * 结束条数
-     */
-    @ApiModelProperty(hidden = true)
-    private int endNum;
-    /**
      * 总条数
      */
     @ApiModelProperty(hidden = true)
@@ -273,10 +268,6 @@ public class PageRequest {
 
     public int getEndPage() {
         return endPage = count % getPageSize() == 0 ? count / getPageSize() : count / getPageSize() + 1;
-    }
-
-    public int getEndNum() {
-        return endNum = getStartNum() + getPageSize();
     }
 
     public int getCount() {
@@ -412,7 +403,7 @@ public class SortBy {
                         @SQLCondition("#if(:vo.companyId!=null){company_id=:vo.companyId}"),
                         @SQLCondition("#if(:vo.name!=null){department_name like CONCAT('%',:vo.name,'%')}"),
                         @SQLCondition(value = "order by id", condition = ""),
-                        @SQLCondition(value = "#if(:pageRequest != null){LIMIT :pageRequest.startNum,:pageRequest.endNum}", condition = ""),
+                        @SQLCondition(value = "#if(:pageRequest != null){LIMIT :pageRequest.startNum,:pageRequest.pageSize}", condition = ""),
                 }
         )
         List<TbDepartment> find(@SQLParam("vo") QueryDepartmentVo departmentVo, @SQLParam("pageRequest") PageRequest pageRequest);
