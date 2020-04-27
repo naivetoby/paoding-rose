@@ -400,4 +400,21 @@ public class SortBy {
                 }
         )
         List<TbUser> findByNamesAndId(List<String> names, List<Integer> ids);
+        
+        /**
+         * 分页 或者排序
+         * @param departmentVo
+         * @param pageRequest
+         * @return
+         */
+        @SQL(value = SELECT_SQL,
+                condition = {
+                        @SQLCondition("#if(:vo.companyId!=null){company_id=:vo.companyId}"),
+                        @SQLCondition("#if(:vo.name!=null){department_name like CONCAT('%',:vo.name,'%')}"),
+                        @SQLCondition(value = "order by id", condition = ""),
+                        @SQLCondition(value = "#if(:pageRequest != null){LIMIT :pageRequest.startNum,:pageRequest.endNum}", condition = ""),
+                }
+        )
+        List<TbDepartment> find(@SQLParam("vo") QueryDepartmentVo departmentVo, @SQLParam("pageRequest") PageRequest pageRequest);
+
 ```

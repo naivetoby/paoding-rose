@@ -46,32 +46,34 @@ public class SystemInterpreter implements Interpreter {
             StringBuilder sql = new StringBuilder(context.flushOut());
             // 转换 and 表达式
             SQLCondition[] sqlConditions = runtime.getSQLAnds();
-            boolean appendWhere = true, appendCondition = true;
-            for (SQLCondition sqlCondition : sqlConditions) {
-                String value = sqlCondition.value();
-                String condition = sqlCondition.condition();
-                String[] values = sqlCondition.values();
-                ArrayList<String> valueList = new ArrayList<>(values.length + 1);
-                valueList.add(value);
-                valueList.addAll(Arrays.asList(values));
-                for (String expression : valueList) {
-                    if (!StringUtils.isEmpty(expression)) {
-                        ExqlPattern sqlAndPattern = ExqlPatternImpl.compile(expression);
-                        ExqlContextImpl sqlAndContext = new ExqlContextImpl(expression.length() + 32);
-                        sqlAndPattern.execute(sqlAndContext, parameters, constants);
-                        String sqlConditionStr = sqlAndContext.flushOut();
-                        if (sqlConditionStr != null && sqlConditionStr.length() > 0) {
-                            if (appendWhere) {
-                                sql.append(" where ");
-                                appendWhere = false;
+            if(sqlConditions != null && sqlConditions.length>0){
+                boolean appendWhere = true, appendCondition = true;
+                for (SQLCondition sqlCondition : sqlConditions) {
+                    String value = sqlCondition.value();
+                    String condition = sqlCondition.condition();
+                    String[] values = sqlCondition.values();
+                    ArrayList<String> valueList = new ArrayList<>(values.length + 1);
+                    valueList.add(value);
+                    valueList.addAll(Arrays.asList(values));
+                    for (String expression : valueList) {
+                        if (!StringUtils.isEmpty(expression)) {
+                            ExqlPattern sqlAndPattern = ExqlPatternImpl.compile(expression);
+                            ExqlContextImpl sqlAndContext = new ExqlContextImpl(expression.length() + 32);
+                            sqlAndPattern.execute(sqlAndContext, parameters, constants);
+                            String sqlConditionStr = sqlAndContext.flushOut();
+                            if (sqlConditionStr != null && sqlConditionStr.length() > 0) {
+                                if (appendWhere) {
+                                    sql.append(" where ");
+                                    appendWhere = false;
+                                }
+                                if (appendCondition) {
+                                    sql.append(sqlConditionStr);
+                                    appendCondition = false;
+                                } else {
+                                    sql.append(" ").append(condition).append(" ").append(sqlConditionStr);
+                                }
+                                runtime.setArgs(sqlAndContext.getParams());
                             }
-                            if (appendCondition) {
-                                sql.append(sqlConditionStr);
-                                appendCondition = false;
-                            } else {
-                                sql.append(" ").append(condition).append(" ").append(sqlConditionStr);
-                            }
-                            runtime.setArgs(sqlAndContext.getParams());
                         }
                     }
                 }
