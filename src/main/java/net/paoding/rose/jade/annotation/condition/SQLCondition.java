@@ -10,6 +10,7 @@ public @interface SQLCondition {
     /**
      * and 或者 or
      * 注: 目前只测试了 and 和 or的使用
+     * 注: 支持 order by 和 limit ,当值为order by  或者 limit 时,此处需要赋值为空穿,具体的分页和排序 需要写在 value中
      * @return
      */
     String condition() default "and";
