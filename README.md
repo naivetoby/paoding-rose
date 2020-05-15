@@ -1,5 +1,11 @@
 # paoding-rose-jade DAO层使用手册
 ## jdk 需要 1.8以上版本
+## 功能
+```
+1. 支持jade 原生的语法 具体用法请参考 1.0 语法支持
+2. 支持 条件语句封装 具体用法参考 2.0 ,[想象MyBatis 的xml一样,自动的添加 关键字]
+3. 支持Option返回值 参考3.0
+```
 ## 特别说明
 ```
 文档中还存在 1=1 的情况也在 2.0.1 version 中解决,具体请参考文档中的2.0
@@ -411,5 +417,9 @@ public class SortBy {
                 }
         )
         List<TbDepartment> find(@SQLParam("vo") QueryDepartmentVo departmentVo, @SQLParam("pageRequest") PageRequest pageRequest);
-
+```
+* 3.0 调整返回值支持Optional<T>返回值
+```java
+@SQL(SELECT_SQL + "where id = :id")
+Optional<T> queryById(@SQLParam("id") Integer id);
 ```
