@@ -141,6 +141,9 @@ public class JdbcStatement implements Statement {
             result = querier.execute(sqlType, runtime);
             result = afterInvocationCallback.execute(runtime, result);
         }
+        if (metaData.getReturnType() == Optional.class && result == null) {
+            return Optional.empty();
+        }
         return result;
 
     }
