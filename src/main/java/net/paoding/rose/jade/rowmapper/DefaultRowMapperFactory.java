@@ -15,16 +15,10 @@
  */
 package net.paoding.rose.jade.rowmapper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import net.paoding.rose.jade.annotation.RowHandler;
+import net.paoding.rose.jade.annotation.StatementRowMapper;
+import net.paoding.rose.jade.excetion.JadeExcetion;
+import net.paoding.rose.jade.statement.StatementMetaData;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,9 +27,7 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
-import net.paoding.rose.jade.annotation.RowHandler;
-import net.paoding.rose.jade.annotation.StatementRowMapper;
-import net.paoding.rose.jade.statement.StatementMetaData;
+import java.util.*;
 
 /**
  * 支持DAO方法返回类型：
@@ -55,11 +47,10 @@ import net.paoding.rose.jade.statement.StatementMetaData;
  * <li>映射(Map&lt;String, User&gt): 期望返回多列，多行</li>
  * <li>映射(Map&lt;String, String[]&gt): 期望返回多列，多行</li>
  * <ul>
- * 
  * @author 王志亮 [qieqie.wang@gmail.com]
  * @author 廖涵 [in355hz@gmail.com]
  */
-@SuppressWarnings({ "rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultRowMapperFactory implements RowMapperFactory {
 
     private static Log logger = LogFactory.getLog(RowMapperFactory.class);
@@ -76,7 +67,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
                     if (logger.isInfoEnabled()) {
                         logger.info("using rowMapper " + rowMapper + " for " + modifier);
                     }
-                    
+
                     if (rowMapper instanceof StatementRowMapper) {
                         ((StatementRowMapper) rowMapper).init(modifier);
                     }
@@ -120,14 +111,23 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
             } else if (rowType == Set.class) {
                 rowMapper = new SetRowMapper(modifier);
             } else {
-                boolean checkColumns = (rowHandler == null) ? true : rowHandler.checkColumns();
-                boolean checkProperties = (rowHandler == null) ? false : rowHandler
-                        .checkProperties();
+                boolean checkColumns = (rowHandler == null) || rowHandler.checkColumns();
+                boolean checkProperties = (rowHandler != null) && rowHandler.checkProperties();
                 String key = rowType.getName() + "[checkColumns=" + checkColumns
                         + "&checkProperties=" + checkProperties + "]";
                 rowMapper = rowMappers.get(key);
                 if (rowMapper == null) {
-                    rowMapper = new BeanPropertyRowMapper(rowType, checkColumns, checkProperties); // jade's BeanPropertyRowMapper here
+                    boolean toOptional = rowType == Optional.class;
+                    if (toOptional) {
+                        Class<?>[] genericReturnTypes = modifier.getGenericReturnTypes();
+                        if (genericReturnTypes == null || genericReturnTypes.length != 1) {
+                            throw new JadeExcetion("option generic paradigm [T] is null or length not equal to 1");
+                        }
+                        rowType = genericReturnTypes[0];
+                    }
+                    // jade's BeanPropertyRowMapper here
+                    rowMapper =
+                            new BeanPropertyRowMapper(rowType, checkColumns, checkProperties, toOptional);
                     rowMappers.put(key, rowMapper);
                 }
             }
@@ -154,7 +154,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
         } //
         else if (Map.class.isAssignableFrom(returnClassType)) {
             return getRowTypeFromMapType(statementMetaData, returnClassType);
-        } 
+        }
         //
         else if (returnClassType.isArray() && returnClassType != byte[].class) {
             // 数组类型, 支持多重数组
@@ -166,7 +166,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
     }
 
     private static Class<?> getRowTypeFromMapType(StatementMetaData modifier,
-            Class<?> returnClassType) {
+                                                  Class<?> returnClassType) {
         Class<?> rowType;
         // 获取  Map<K, V> 值元素类型
         Class<?>[] genericTypes = modifier.getGenericReturnTypes();
@@ -179,13 +179,13 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
     }
 
     private static Class<?> getRowTypeFromCollectionType(StatementMetaData modifier,
-            Class<?> returnClassType) {
+                                                         Class<?> returnClassType) {
         Class<?> rowType;
         // 仅支持  List/ArrayList/LinkedList, CollectionIterable/Iterator, Set/HashSet
         if ((returnClassType != List.class) && (returnClassType != ArrayList.class) && (returnClassType != LinkedList.class)//
-                && (returnClassType != Collection.class) && (returnClassType != Iterable.class)&& (returnClassType != Iterator.class)
+                && (returnClassType != Collection.class) && (returnClassType != Iterable.class) && (returnClassType != Iterator.class)
                 && (returnClassType != Set.class) && (returnClassType != HashSet.class)
-                ) {
+        ) {
             throw new IllegalArgumentException("error collection type " + returnClassType.getName()
                     + "; only support List/ArrayList/LinkedList, CollectionIterable/Iterator, Set/HashSet");
         }

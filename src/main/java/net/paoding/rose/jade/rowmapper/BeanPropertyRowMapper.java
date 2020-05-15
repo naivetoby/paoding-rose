@@ -16,56 +16,48 @@
 
 package net.paoding.rose.jade.rowmapper;
 
-import java.beans.PropertyDescriptor;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanInstantiationException;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.NotWritablePropertyException;
+import org.springframework.beans.*;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
 
+import java.beans.PropertyDescriptor;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.*;
+
 /**
  * {@link RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
  * top-level class and it must have a default or no-arg constructor.
- * 
+ *
  * <p>
  * Column values are mapped based on matching the column name as obtained
  * from result set metadata to public setters for the corresponding
  * properties. The names are matched either directly or by transforming a
  * name separating the parts with underscores to the same name using
  * "camel" case.
- * 
+ *
  * <p>
  * Mapping is provided for fields in the target class for many common
  * types, e.g.: String, boolean, Boolean, byte, Byte, short, Short, int,
  * Integer, long, Long, float, Float, double, Double, BigDecimal,
  * <code>java.util.Date</code>, etc.
- * 
+ *
  * <p>
  * To facilitate mapping between columns and fields that don't have
  * matching names, try using column aliases in the SQL statement like
  * "select fname as first_name from customer".
- * 
+ *
  * <p>
  * Please note that this class is designed to provide convenience rather
  * than high performance. For best performance consider using a custom
  * RowMapper.
- * 
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author 王志亮 [qieqie.wang@gmail.com]
@@ -73,40 +65,48 @@ import org.springframework.util.Assert;
  */
 public class BeanPropertyRowMapper implements RowMapper {
 
-    /** Logger available to subclasses */
+    /**
+     * Logger available to subclasses
+     */
     protected final Log logger = LogFactory.getLog(getClass());
 
-    /** The class we are mapping to */
+    /**
+     * The class we are mapping to
+     */
     private final Class<?> mappedClass;
 
-    /** Map of the fields we provide mapping for */
+    /**
+     * Map of the fields we provide mapping for
+     */
     private Map<String, PropertyDescriptor> mappedFields;
 
     private final boolean checkColumns;
 
     private final boolean checkProperties;
 
-    /** Set of bean properties we provide mapping for */
+    private final boolean toOptional;
+
+    /**
+     * Set of bean properties we provide mapping for
+     */
     private Set<String> mappedProperties;
 
     /**
      * Create a new BeanPropertyRowMapper, accepting unpopulated properties
      * in the target bean.
-     * 
      * @param mappedClass the class that each row should be mapped to
      */
-    public BeanPropertyRowMapper(Class<?> mappedClass, boolean checkColumns, boolean checkProperties) {
+    public BeanPropertyRowMapper(Class<?> mappedClass, boolean checkColumns, boolean checkProperties, boolean toOptional) {
         this.mappedClass = mappedClass;
         Assert.state(this.mappedClass != null, "Mapped class was not specified");
         this.checkProperties = checkProperties;
         this.checkColumns = checkColumns;
+        this.toOptional = toOptional;
         initialize();
     }
 
     /**
      * Initialize the mapping metadata for the given class.
-     * 
-     * @param mappedClass the mapped class.
      */
     protected void initialize() {
         this.mappedFields = new HashMap<String, PropertyDescriptor>();
@@ -135,7 +135,6 @@ public class BeanPropertyRowMapper implements RowMapper {
      * Convert a name in camelCase to an underscored name in lower case.
      * Any upper case letters are converted to lower case with a preceding
      * underscore.
-     * 
      * @param camelCaseName the string containing original name
      * @return the converted name
      */
@@ -160,7 +159,7 @@ public class BeanPropertyRowMapper implements RowMapper {
         boolean digitFound = false;
         for (int i = name.length() - 1; i >= 0; i--) {
             if (Character.isDigit(name.charAt(i))) {
-            	// 遇到数字就做一个标识并continue,直到不是时才不continue
+                // 遇到数字就做一个标识并continue,直到不是时才不continue
                 digitFound = true;
                 continue;
             }
@@ -173,16 +172,16 @@ public class BeanPropertyRowMapper implements RowMapper {
             }
             digitFound = false;
         }
-        return new String[] { name, name2 };
+        return new String[]{name, name2};
     }
 
     /**
      * Extract the values for all columns in the current row.
      * <p>
      * Utilizes public setters and result set metadata.
-     * 
      * @see java.sql.ResultSetMetaData
      */
+    @Override
     public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
         // spring's : Object mappedObject = BeanUtils.instantiateClass(this.mappedClass);
         // jade's : private Object instantiateClass(this.mappedClass);
@@ -234,11 +233,10 @@ public class BeanPropertyRowMapper implements RowMapper {
                             + this.mappedProperties);
         }
 
-        return mappedObject;
+        return this.toOptional ? Optional.of(mappedObject) : mappedObject;
     }
 
     /**
-     * 
      * @param clazz
      * @return
      * @throws BeanInstantiationException
