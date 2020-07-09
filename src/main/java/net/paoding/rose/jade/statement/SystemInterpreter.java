@@ -19,8 +19,8 @@ import net.paoding.rose.jade.annotation.condition.SQLCondition;
 import net.paoding.rose.jade.statement.expression.ExqlPattern;
 import net.paoding.rose.jade.statement.expression.impl.ExqlContextImpl;
 import net.paoding.rose.jade.statement.expression.impl.ExqlPatternImpl;
-import org.springframework.jdbc.BadSqlGrammarException;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 import java.sql.SQLSyntaxErrorException;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class SystemInterpreter implements Interpreter {
                             sqlAndPattern.execute(sqlAndContext, parameters, constants);
                             String sqlConditionStr = sqlAndContext.flushOut();
                             if (StringUtils.isNotBlank(sqlConditionStr)) {
-                                if (appendWhere) {
+                                if (appendWhere && StringUtils.isNotBlank(condition)) {
                                     sql.append(" where ");
                                     appendWhere = false;
                                 }
