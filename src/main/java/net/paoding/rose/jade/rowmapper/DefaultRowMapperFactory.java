@@ -27,7 +27,16 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * 支持DAO方法返回类型：
@@ -113,13 +122,16 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
             } else {
                 boolean checkColumns = (rowHandler == null) || rowHandler.checkColumns();
                 boolean checkProperties = (rowHandler != null) && rowHandler.checkProperties();
-                String key = rowType.getName() + "[checkColumns=" + checkColumns
-                        + "&checkProperties=" + checkProperties + "]";
-                rowMapper = rowMappers.get(key);
+                boolean toOptional = rowType == Optional.class;
+                Class<?>[] genericReturnTypes = modifier.getGenericReturnTypes();
+                StringBuilder key = new StringBuilder(rowType.getName());
+                key.append("[checkColumns=").append(checkColumns).append("&checkProperties=").append(checkProperties);
+                if (genericReturnTypes != null && genericReturnTypes.length == 1) {
+                    key.append("&genericReturnTypes=").append(genericReturnTypes[0].getTypeName());
+                }
+                rowMapper = rowMappers.get(key.append("]").toString());
                 if (rowMapper == null) {
-                    boolean toOptional = rowType == Optional.class;
                     if (toOptional) {
-                        Class<?>[] genericReturnTypes = modifier.getGenericReturnTypes();
                         if (genericReturnTypes == null || genericReturnTypes.length != 1) {
                             throw new JadeExcetion("option generic paradigm [T] is null or length not equal to 1");
                         }
@@ -128,7 +140,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
                     // jade's BeanPropertyRowMapper here
                     rowMapper =
                             new BeanPropertyRowMapper(rowType, checkColumns, checkProperties, toOptional);
-                    rowMappers.put(key, rowMapper);
+                    rowMappers.put(key.toString(), rowMapper);
                 }
             }
             // 如果DAO方法最终返回的是Map，rowMapper要返回Map.Entry对象
