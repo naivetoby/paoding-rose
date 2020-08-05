@@ -36,13 +36,14 @@ public class SpringDataSourceFactoryDelegate implements DataSourceFactory {
             String catlogBeanName = StringUtils.isEmpty(catalog) ? beanName : beanName + "." + catalog;
             ListableBeanFactory beanFactory = this.beanFactory;
             if (beanFactory != null) {
-                if (beanFactory.containsBeanDefinition(catlogBeanName)) {
+                if (beanFactory.containsBeanDefinition(catlogBeanName) || beanFactory.containsBean(catlogBeanName)) {
                     dataSourceFactory = beanFactory.getBean(catlogBeanName, DataSourceFactory.class);
-                } else if (beanFactory.containsBeanDefinition(beanName)) {
+                } else if (beanFactory.containsBeanDefinition(beanName) || beanFactory.containsBean(beanName)) {
                     dataSourceFactory = beanFactory.getBean(beanName, DataSourceFactory.class);
                 } else {
                     dataSourceFactory = new SpringDataSourceFactory(beanFactory);
                 }
+                assert dataSourceFactory != null;
                 dataSourceFactoryMap.put(key, dataSourceFactory);
             }
         }
