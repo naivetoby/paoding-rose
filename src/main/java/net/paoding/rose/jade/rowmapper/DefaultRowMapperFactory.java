@@ -17,7 +17,7 @@ package net.paoding.rose.jade.rowmapper;
 
 import net.paoding.rose.jade.annotation.RowHandler;
 import net.paoding.rose.jade.annotation.StatementRowMapper;
-import net.paoding.rose.jade.excetion.JadeExcetion;
+import net.paoding.rose.jade.excetion.JadeException;
 import net.paoding.rose.jade.statement.StatementMetaData;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
@@ -133,7 +133,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
                 if (rowMapper == null) {
                     if (toOptional) {
                         if (genericReturnTypes == null || genericReturnTypes.length != 1) {
-                            throw new JadeExcetion("option generic paradigm [T] is null or length not equal to 1");
+                            throw new JadeException("option generic paradigm [T] is null or length not equal to 1");
                         }
                         rowType = genericReturnTypes[0];
                     }

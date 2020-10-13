@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class ExprResolverImpl implements ExprResolver {
 
     // 表达式的缓存
-    protected static final ConcurrentHashMap<String, Expression> cache = new ConcurrentHashMap<String, Expression>();
+    protected static final ConcurrentHashMap<String, Expression> CACHE = new ConcurrentHashMap<String, Expression>();
 
     // 正则表达式
     //private static final Pattern PREFIX_PATTERN = Pattern.compile( // NL
@@ -123,7 +123,7 @@ public class ExprResolverImpl implements ExprResolver {
     public Object executeExpr(final String expression) throws Exception {
 
         // 从缓存中获取解析的表达式
-        Expression expr = cache.get(expression);
+        Expression expr = CACHE.get(expression);
 
         if (expr == null) {
             //
@@ -172,8 +172,8 @@ public class ExprResolverImpl implements ExprResolver {
                     }
 
                     if (!mapVars.containsKey(name)) {
-                        throw new IllegalArgumentException("Variable \'" + name
-                                + "\' not defined in DAO method");
+                        throw new IllegalArgumentException("Variable '" + name
+                                + "' not defined in DAO method");
                     }
 
                     // 按名称访问变量
@@ -185,15 +185,15 @@ public class ExprResolverImpl implements ExprResolver {
                 } else if ("$".equals(prefix)) {
 
                     if (!mapConsts.containsKey(name)) {
-                        throw new IllegalArgumentException("Constant \'" + name
-                                + "\' not defined in DAO class");
+                        throw new IllegalArgumentException("Constant '" + name
+                                + "' not defined in DAO class");
                     }
 
                     // 拼出常量访问语句
                     builder.append(CONST_PREFIX);
-                    builder.append("[\'");
+                    builder.append("['");
                     builder.append(name);
-                    builder.append("\']");
+                    builder.append("']");
                 }
 
                 index = matcher.end(2);
@@ -203,7 +203,7 @@ public class ExprResolverImpl implements ExprResolver {
 
             // 编译表达式
             expr = ExpressionFactory.createExpression(builder.toString());
-            cache.putIfAbsent(expression2, expr);
+            CACHE.putIfAbsent(expression2, expr);
         }
 
         // 进行表达式求值

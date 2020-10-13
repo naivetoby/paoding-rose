@@ -147,10 +147,10 @@ public class UpdateQuerier implements Querier {
             if (batchs.size() == 1) {
                 updatedArray = batchResult;
             } else {
-                int index_at_sub_batch = 0;
+                int indexAtSubBatch = 0;
                 for (StatementRuntime batchRuntime : batchRuntimes) {
-                    Integer _index_at_batch_ = batchRuntime.getProperty("_index_at_batch_");
-                    updatedArray[_index_at_batch_] = batchResult[index_at_sub_batch++];
+                    Integer index_at_batch_ = batchRuntime.getProperty("_index_at_batch_");
+                    updatedArray[index_at_batch_] = batchResult[indexAtSubBatch++];
                 }
             }
         }
@@ -158,7 +158,7 @@ public class UpdateQuerier implements Querier {
     }
 
     @SuppressWarnings("unused")
-    private Object _executeBatch(StatementRuntime... runtimes) {
+    private Object executeBatch_(StatementRuntime... runtimes) {
         int[] updatedArray = new int[runtimes.length];
         for (int i = 0; i < updatedArray.length; i++) {
             StatementRuntime runtime = runtimes[i];

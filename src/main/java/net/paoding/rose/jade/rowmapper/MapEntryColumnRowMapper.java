@@ -67,6 +67,7 @@ public class MapEntryColumnRowMapper implements RowMapper {
         this.valueType = genericTypes[1];
     }
 
+    @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 
         // 验证列的数目

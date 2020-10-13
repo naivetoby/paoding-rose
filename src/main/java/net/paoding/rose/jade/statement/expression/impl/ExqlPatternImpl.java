@@ -1,38 +1,40 @@
 package net.paoding.rose.jade.statement.expression.impl;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 import net.paoding.rose.jade.statement.expression.ExprResolver;
 import net.paoding.rose.jade.statement.expression.ExqlContext;
 import net.paoding.rose.jade.statement.expression.ExqlPattern;
 import net.paoding.rose.jade.statement.expression.ExqlUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 实现语句的执行接口。
- *
  * @author han.liao
  */
 public class ExqlPatternImpl implements ExqlPattern {
 
-    // 输出日志
+    /**
+     * 输出日志
+     */
     private static final Log logger = LogFactory.getLog(ExqlPattern.class);
-
-    // 语句的缓存
-    private static final ConcurrentHashMap<String, ExqlPattern> cache = new ConcurrentHashMap<String, ExqlPattern>();
-
-    // 编译的语句
+    /**
+     * 语句的缓存
+     */
+    private static final ConcurrentHashMap<String, ExqlPattern> CACHE = new ConcurrentHashMap<>();
+    /**
+     * 编译的语句
+     */
     protected final String pattern;
-
-    // 输出的单元
+    /**
+     * 输出的单元
+     */
     protected final ExqlUnit unit;
 
     /**
      * 构造语句的执行接口。
-     *
      * @param pattern - 编译的语句
      * @param unit    - 输出的单元
      */
@@ -43,14 +45,13 @@ public class ExqlPatternImpl implements ExqlPattern {
 
     /**
      * 从语句编译: ExqlPattern 对象。
-     *
      * @param pattern - 待编译的语句
      * @return ExqlPattern 对象
      */
     public static ExqlPattern compile(String pattern) {
 
         // 从缓存中获取编译好的语句
-        ExqlPattern compiledPattern = cache.get(pattern);
+        ExqlPattern compiledPattern = CACHE.get(pattern);
         if (compiledPattern == null) {
 
             // 输出日志
@@ -63,7 +64,7 @@ public class ExqlPatternImpl implements ExqlPattern {
             compiledPattern = compiler.compile();
 
             // 语句的缓存
-            cache.putIfAbsent(pattern, compiledPattern);
+            CACHE.putIfAbsent(pattern, compiledPattern);
         }
 
         return compiledPattern;
@@ -118,9 +119,9 @@ public class ExqlPatternImpl implements ExqlPattern {
         ExqlPattern pattern = ExqlPatternImpl.compile(
                 "INSERT INTO role_table ( id ) VALUES " +
                         "#for(keyValue in :keyValues){" +
-                            " (#for(key in :keyValue.keySet()){" +
-                                " null ,'##(:keyValue[:key])'" +
-                            "  }) " +
+                        " (#for(key in :keyValue.keySet()){" +
+                        " null ,'##(:keyValue[:key])'" +
+                        "  }) " +
                         "}"
         );
 

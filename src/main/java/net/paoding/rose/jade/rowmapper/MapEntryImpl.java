@@ -37,37 +37,47 @@ public class MapEntryImpl<K, V> implements Map.Entry<K, V> {
         key = k;
     }
 
+    @Override
     public final K getKey() {
         return key;
     }
 
+    @Override
     public final V getValue() {
         return value;
     }
 
+    @Override
     public final V setValue(V newValue) {
         V oldValue = value;
         value = newValue;
         return oldValue;
     }
 
+    @Override
     public final boolean equals(Object o) {
-        if (!(o instanceof Map.Entry)) return false;
+        if (!(o instanceof Map.Entry)) {
+            return false;
+        }
         Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
         Object k1 = getKey();
         Object k2 = e.getKey();
         if (k1 == k2 || (k1 != null && k1.equals(k2))) {
             Object v1 = getValue();
             Object v2 = e.getValue();
-            if (v1 == v2 || (v1 != null && v1.equals(v2))) return true;
+            if (v1 == v2 || (v1 != null && v1.equals(v2))) {
+                return true;
+            }
         }
         return false;
     }
 
+    @Override
     public final int hashCode() {
         return (key == null ? 0 : key.hashCode()) ^ (value == null ? 0 : value.hashCode());
     }
 
+    @Override
     public final String toString() {
         return getKey() + "=" + getValue();
     }

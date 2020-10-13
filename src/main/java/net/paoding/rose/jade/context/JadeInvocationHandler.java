@@ -19,7 +19,7 @@ import net.paoding.rose.jade.annotation.DAO;
 import net.paoding.rose.jade.annotation.SQLParam;
 import net.paoding.rose.jade.annotation.SQLType;
 import net.paoding.rose.jade.dataaccess.DataAccessFactory;
-import net.paoding.rose.jade.excetion.JadeExcetion;
+import net.paoding.rose.jade.excetion.JadeException;
 import net.paoding.rose.jade.rowmapper.RowMapperFactory;
 import net.paoding.rose.jade.statement.*;
 import net.paoding.rose.jade.statement.cached.CacheProvider;
@@ -101,7 +101,7 @@ public class JadeInvocationHandler implements InvocationHandler {
                 if (sqlParam != null) {
                     String value = sqlParam.value();
                     if ("index".equals(value)) {
-                        throw new JadeExcetion("SQLParam value equals index,Please set other values!");
+                        throw new JadeException("SQLParam value equals index,Please set other values!");
                     }
                     parameters.put(value, args[i]);
                 }

@@ -106,6 +106,7 @@ public class JadeComponentProvider implements ResourceLoaderAware {
      * @see org.springframework.core.io.support.ResourcePatternResolver
      * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
      */
+    @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourcePatternResolver = ResourcePatternUtils
                 .getResourcePatternResolver(resourceLoader);

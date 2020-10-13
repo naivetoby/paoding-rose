@@ -158,7 +158,7 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     /**
      * 开关属性前缀常量
      */
-    private static final String propertyPrefix = "jade.context.spring";;
+    private static final String PROPERTY_PREFIX = "jade.context.spring";;
 
     /**
      * 日志记录器
@@ -283,11 +283,11 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     @Override
     public final void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
             throws BeansException {
-        String springFlag = System.getProperty(propertyPrefix);
+        String springFlag = System.getProperty(PROPERTY_PREFIX);
 
         // 对于配置了jade.context.spring 系统属性的，表示jade的spring初始化工作不由本类负责。
         if (springFlag != null && springFlag.length() > 0) {
-            logger.info("found " + propertyPrefix + "=" + springFlag);
+            logger.info("found " + PROPERTY_PREFIX + "=" + springFlag);
             return;
         }
 
@@ -442,9 +442,9 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
         while (true) {
             String flag;
             if (name.length() == 0) {
-                flag = System.getProperty(propertyPrefix + ".*");
+                flag = System.getProperty(PROPERTY_PREFIX + ".*");
             } else {
-                flag = System.getProperty(propertyPrefix + "." + name);
+                flag = System.getProperty(PROPERTY_PREFIX + "." + name);
             }
             if (flag == null) {
                 int index = name.lastIndexOf('.');
@@ -467,7 +467,7 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
                 if (name.length() == 0) {
                     name = "*";
                 }
-                throw new IllegalArgumentException("illegal value of property: " + propertyPrefix
+                throw new IllegalArgumentException("illegal value of property: " + PROPERTY_PREFIX
                         + "." + name + "='" + flag + "'");
             }
         }

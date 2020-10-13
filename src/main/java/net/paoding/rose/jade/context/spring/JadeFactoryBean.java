@@ -15,8 +15,6 @@
  */
 package net.paoding.rose.jade.context.spring;
 
-import java.lang.reflect.Proxy;
-
 import net.paoding.rose.jade.context.JadeInvocationHandler;
 import net.paoding.rose.jade.dataaccess.DataAccessFactory;
 import net.paoding.rose.jade.rowmapper.RowMapperFactory;
@@ -24,18 +22,16 @@ import net.paoding.rose.jade.statement.DAOMetaData;
 import net.paoding.rose.jade.statement.InterpreterFactory;
 import net.paoding.rose.jade.statement.StatementWrapperProvider;
 import net.paoding.rose.jade.statement.cached.CacheProvider;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Proxy;
+
 /**
- * 
- * 
  * @author 王志亮 [qieqie.wang@gmail.com]
  * @author 廖涵 [in355hz@gmail.com]
- * 
  */
 @SuppressWarnings("rawtypes")
 public class JadeFactoryBean implements FactoryBean, InitializingBean {
@@ -51,7 +47,7 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     protected CacheProvider cacheProvider;
 
     protected Object daoObject;
-    
+
     // 可选的
     private StatementWrapperProvider statementWrapperProvider;
 
@@ -68,7 +64,6 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     }
 
     /**
-     * 
      * @param dataAccessFactory
      */
     public void setDataAccessFactory(DataAccessFactory dataAccessFactory) {
@@ -80,7 +75,6 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     }
 
     /**
-     * 
      * @param rowMapperFactory
      */
     public void setRowMapperFactory(RowMapperFactory rowMapperFactory) {
@@ -92,7 +86,6 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     }
 
     /**
-     * 
      * @param interpreterFactory
      */
     public void setInterpreterFactory(InterpreterFactory interpreterFactory) {
@@ -110,11 +103,11 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     public CacheProvider getCacheProvider() {
         return cacheProvider;
     }
-    
+
     public StatementWrapperProvider getStatementWrapperProvider() {
         return statementWrapperProvider;
     }
-    
+
     public void setStatementWrapperProvider(StatementWrapperProvider statementWrapperProvider) {
         this.statementWrapperProvider = statementWrapperProvider;
     }
@@ -127,9 +120,10 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         Assert.isTrue(objectType.isInterface(), "not a interface class: " + objectType.getName());
-        Assert.notNull(dataAccessFactory);
-        Assert.notNull(rowMapperFactory);
-        Assert.notNull(interpreterFactory);
+
+        Assert.notNull(dataAccessFactory, "data access factory is null");
+        Assert.notNull(rowMapperFactory, "row mapper factory is null");
+        Assert.notNull(interpreterFactory, "interpreter factory is null");
         // cacheProvider可以null，不做assert.notNull判断
     }
 
@@ -137,7 +131,7 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     public Object getObject() {
         if (daoObject == null) {
             daoObject = createDAO();
-            Assert.notNull(daoObject);
+            Assert.notNull(daoObject, "dao object is null");
         }
         return daoObject;
     }
@@ -150,7 +144,7 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
                     daoMetaData, interpreterFactory, rowMapperFactory, dataAccessFactory,
                     cacheProvider, statementWrapperProvider);
             return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
-                    new Class[] { objectType }, handler);
+                    new Class[]{objectType}, handler);
         } catch (RuntimeException e) {
             throw new IllegalStateException("failed to create bean for "
                     + this.objectType.getName(), e);

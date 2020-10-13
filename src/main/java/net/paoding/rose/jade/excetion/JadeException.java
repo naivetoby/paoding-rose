@@ -5,11 +5,11 @@ package net.paoding.rose.jade.excetion;
  * @Description
  * @create 2020-04-22 11:54:00
  */
-public class JadeExcetion extends RuntimeException {
+public class JadeException extends RuntimeException {
 
     private String message;
 
-    public JadeExcetion(String message, Object... objects) {
+    public JadeException(String message, Object... objects) {
         if (message != null && objects.length > 0 && message.contains("{}")) {
             for (Object obj : objects) {
                 message = message.replaceFirst("\\{}", obj == null ? "null" : String.valueOf(obj));
@@ -18,11 +18,11 @@ public class JadeExcetion extends RuntimeException {
         this.message = message;
     }
 
-    public JadeExcetion(String message) {
+    public JadeException(String message) {
         this.message = message;
     }
 
-    public JadeExcetion(String message, Throwable throwable) {
+    public JadeException(String message, Throwable throwable) {
         this.message = message;
         super.addSuppressed(throwable);
 
