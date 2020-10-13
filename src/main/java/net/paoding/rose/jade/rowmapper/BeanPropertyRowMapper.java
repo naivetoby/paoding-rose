@@ -16,7 +16,6 @@
 
 package net.paoding.rose.jade.rowmapper;
 
-import net.paoding.rose.jade.util.JdbcHelpUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.*;
@@ -207,7 +206,6 @@ public class BeanPropertyRowMapper implements RowMapper {
                         logger.debug("Mapping column '" + column + "' to property '" + pd.getName()
                                 + "' of type " + pd.getPropertyType());
                     }
-                    value = JdbcHelpUtils.getTimeValue(rs, index, pd.getPropertyType(), value);
                     bw.setPropertyValue(pd.getName(), value);
                     if (populatedProperties != null) {
                         populatedProperties.add(pd.getName());
