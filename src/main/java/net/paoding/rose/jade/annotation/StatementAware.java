@@ -21,7 +21,6 @@ import net.paoding.rose.jade.statement.StatementMetaData;
  * 
  * @author 王志亮 [qieqie.wang@gmail.com]
  *
- * @param <T>
  */
 public interface StatementAware {
 
