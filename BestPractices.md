@@ -974,8 +974,8 @@ import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+
+import cn.zhangfusheng.base.annotation.valid.NotNull;
 import java.time.LocalDateTime;
 
 /**
@@ -993,38 +993,38 @@ public class TbAddress implements BaseBean {
     private Long id;
 
     @ApiModelProperty("父级id")
-    @NotNull(message = "[父级id]parentId is null or blank")
+    @NotNull("[父级id]parentId is null or blank")
     private Integer parentId;
 
     @ApiModelProperty("全名")
-    @NotBlank(message = "[全名]fullName is null or blank")
+    @NotNull("[全名]fullName is null or blank")
     private String fullName;
 
     @ApiModelProperty("地址名称")
-    @NotBlank(message = "[地址名称]name is null or blank")
+    @NotNull("[地址名称]name is null or blank")
     private String name;
 
     @ApiModelProperty("地址编码")
     private String addressCode;
 
     @ApiModelProperty("城市首字母")
-    @NotBlank(message = "[城市首字母]cityFirstChar is null or blank")
+    @NotNull("[城市首字母]cityFirstChar is null or blank")
     private String cityFirstChar;
 
     @ApiModelProperty("汉语拼音")
-    @NotBlank(message = "[汉语拼音]cityPinYin is null or blank")
+    @NotNull("[汉语拼音]cityPinYin is null or blank")
     private String cityPinYin;
 
     @ApiModelProperty("等级")
-    @NotNull(message = "[等级]level is null or blank")
+    @NotNull("[等级]level is null or blank")
     private Integer level;
 
     @ApiModelProperty("首字")
-    @NotBlank(message = "[首字]provinceChar is null or blank")
+    @NotNull("[首字]provinceChar is null or blank")
     private String provinceChar;
 
     @ApiModelProperty("排序")
-    @NotNull(message = "[排序]sort is null or blank")
+    @NotNull("[排序]sort is null or blank")
     private Integer sort;
 
     @ApiModelProperty("0启用,1禁用")
