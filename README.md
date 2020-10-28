@@ -294,6 +294,69 @@ public class PageRequest {
     }
 }
 ```
+## PageResponse
+```java
+package cn.zhangfusheng.base.page;
+
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author fusheng.zhang
+ * @Description
+ * @create 2019-11-05 11:37:00
+ */
+@EqualsAndHashCode(callSuper = true)
+@Data
+@Accessors(chain = true)
+@ApiModel("分页响应")
+public class PageResponse<T> extends PageRequest {
+
+    public PageResponse(int pageSize, int pageNumber, int total) {
+        super.setPageSize(pageSize).setPageNumber(pageNumber).setTotal(total);
+    }
+
+    public PageResponse(PageRequest pageRequest) {
+        super.setPageSize(pageRequest.getPageSize())
+                .setPageNumber(pageRequest.getPageNumber())
+                .setStartNum(pageRequest.getStartNum())
+                .setEndPage(pageRequest.getEndPage())
+                .setCount(pageRequest.getCount())
+                .setTotal(pageRequest.getTotal())
+                .setTotalPage(pageRequest.getTotalPage());
+
+    }
+
+    /**
+     * 分页数据
+     */
+    private List<T> data;
+
+
+    public PageResponse<T> setData(List<T> data) {
+        if (CollectionUtils.isEmpty(data)) {
+            this.data = new ArrayList<T>(0);
+        } else {
+            this.data = data;
+        }
+        return this;
+    }
+
+    public List<T> getData() {
+        if (CollectionUtils.isEmpty(data)) {
+            return new ArrayList<T>(0);
+        }
+        return data;
+    }
+}
+
+```
 ## sortBy 字段排序配置
 ```java
 package cn.zhangfusheng.base.page;
