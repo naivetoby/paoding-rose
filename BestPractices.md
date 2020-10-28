@@ -831,28 +831,24 @@ public interface BaseController<T extends BaseBean> {
         return BaseResponse.success(getBaseService().queryOne(t));
     }
 
-    @Valid
     @PutMapping
     @ApiOperation(value = "更新[id必须存在]", notes = "更新[id必须存在]", produces = "application/json")
     default BaseResponse<T> updateById(@RequestBody T t) {
         return BaseResponse.success("更新成功", getBaseService().updateById(t));
     }
 
-    @Valid
     @PostMapping
     @ApiOperation(value = "添加", notes = "添加", produces = "application/json")
     default BaseResponse<T> insert(@RequestBody T t) {
         return BaseResponse.success("添加成功", getBaseService().insert(t));
     }
 
-    @Valid
     @PostMapping("insertOrUpdate")
     @ApiOperation(value = "保存或者更新", notes = "保存或者更新", produces = "application/json")
     default BaseResponse<T> insertOrUpdate(@RequestBody T t) {
         return BaseResponse.success("修改成功", getBaseService().insertOrUpdate(t));
     }
 
-    @Valid
     @DeleteMapping("{id}")
     @ApiOperation(value = "根据id删除", notes = "根据id删除", produces = "application/json")
     default BaseResponse<Integer> delete(@PathVariable Long id) {
