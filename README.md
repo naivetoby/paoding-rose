@@ -1,3 +1,4 @@
+<a href='BestPractices.md'>本场最佳实践</a>
 # paoding-rose-jade DAO层使用手册
 ## jdk 需要 1.8以上版本
 ## 功能
