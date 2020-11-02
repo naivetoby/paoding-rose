@@ -1,5 +1,5 @@
 # 特别鸣谢
-<a src="https://www.jetbrains.com/?from=paoding-rose-jade"><img href="idea.jpg"/></a>
+<a href="https://www.jetbrains.com/?from=paoding-rose-jade"><img src="idea.jpg"></a>
 # 最佳实现
 <a href='BestPractices.md'>本场最佳实践</a>
 # paoding-rose-jade DAO层使用手册
