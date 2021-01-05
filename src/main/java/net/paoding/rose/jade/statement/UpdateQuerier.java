@@ -71,8 +71,7 @@ public class UpdateQuerier implements Querier {
 
     private Object executeSingle(StatementRuntime runtime, Class<?> returnType) {
         Number result;
-        DataAccess dataAccess = dataAccessProvider.getDataAccess(//
-                runtime.getMetaData(), runtime.getProperties());
+        DataAccess dataAccess = dataAccessProvider.getDataAccess(runtime.getMetaData(), runtime.getProperties());
         if (returnGeneratedKeys) {
             ArrayList<Map<String, Object>> keys = new ArrayList<Map<String, Object>>(1);
             KeyHolder generatedKeyHolder = new GeneratedKeyHolder(keys);

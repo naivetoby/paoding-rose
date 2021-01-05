@@ -15,9 +15,9 @@ import java.util.Map;
  */
 public class SpringDataSourceFactoryDelegate implements DataSourceFactory {
 
-    private ListableBeanFactory beanFactory;
+    private final ListableBeanFactory beanFactory;
 
-    private Map<String, DataSourceFactory> dataSourceFactoryMap = new HashMap<>();
+    private final Map<String, DataSourceFactory> dataSourceFactoryMap = new HashMap<>();
 
     public SpringDataSourceFactoryDelegate(ListableBeanFactory beanFactory) {
         this.beanFactory = beanFactory;
@@ -43,7 +43,6 @@ public class SpringDataSourceFactoryDelegate implements DataSourceFactory {
                 } else {
                     dataSourceFactory = new SpringDataSourceFactory(beanFactory);
                 }
-                assert dataSourceFactory != null;
                 dataSourceFactoryMap.put(key, dataSourceFactory);
             }
         }
