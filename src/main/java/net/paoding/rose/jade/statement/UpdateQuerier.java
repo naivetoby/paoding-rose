@@ -54,11 +54,7 @@ public class UpdateQuerier implements Querier {
             returnType = ClassUtils.primitiveToWrapper(returnType);
         }
         this.returnType = returnType;
-        if (returnType != void.class && (method.isAnnotationPresent(ReturnGeneratedKeys.class))) {
-            returnGeneratedKeys = true;
-        } else {
-            returnGeneratedKeys = false;
-        }
+        returnGeneratedKeys = returnType != void.class && (method.isAnnotationPresent(ReturnGeneratedKeys.class));
     }
 
     @Override
@@ -87,7 +83,7 @@ public class UpdateQuerier implements Querier {
                 result = null;
             }
         } else {
-            result = new Integer(dataAccess.update(runtime.getSQL(), runtime.getArgs(), null));
+            result = dataAccess.update(runtime.getSQL(), runtime.getArgs(), null);
         }
         //
         if (result == null || returnType == void.class) {
@@ -123,11 +119,7 @@ public class UpdateQuerier implements Querier {
         Map<String, List<StatementRuntime>> batchs = new HashMap<String, List<StatementRuntime>>();
         for (int i = 0; i < runtimes.length; i++) {
             StatementRuntime runtime = runtimes[i];
-            List<StatementRuntime> batch = batchs.get(runtime.getSQL());
-            if (batch == null) {
-                batch = new LinkedList<StatementRuntime>();
-                batchs.put(runtime.getSQL(), batch);
-            }
+            List<StatementRuntime> batch = batchs.computeIfAbsent(runtime.getSQL(), k -> new LinkedList<StatementRuntime>());
             // 该runtime在batch中的位置
             runtime.setProperty("_index_at_batch_", i);
             batch.add(runtime);
