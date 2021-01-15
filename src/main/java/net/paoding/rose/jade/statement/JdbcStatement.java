@@ -109,8 +109,8 @@ public class JdbcStatement implements Statement {
         if (batchUpdate) {
             //
             Iterable<?> iterable = (Iterable<?>) parameters.get(":1");
-            Iterator<?> iterator = (Iterator<?>) iterable.iterator();
-            List<StatementRuntime> runtimes = new LinkedList<StatementRuntime>();
+            Iterator<?> iterator = iterable.iterator();
+            List<StatementRuntime> runtimes = new LinkedList<>();
             int index = 0;
             while (iterator.hasNext()) {
                 Object arg = iterator.next();

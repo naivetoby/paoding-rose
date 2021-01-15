@@ -15,6 +15,15 @@
  */
 package net.paoding.rose.jade.statement;
 
+import net.paoding.rose.jade.annotation.ReturnGeneratedKeys;
+import net.paoding.rose.jade.annotation.SQLType;
+import net.paoding.rose.jade.dataaccess.DataAccess;
+import net.paoding.rose.jade.dataaccess.DataAccessFactory;
+import org.apache.commons.lang.ClassUtils;
+import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,18 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.paoding.rose.jade.annotation.ReturnGeneratedKeys;
-import net.paoding.rose.jade.annotation.SQLType;
-import net.paoding.rose.jade.dataaccess.DataAccess;
-import net.paoding.rose.jade.dataaccess.DataAccessFactory;
-
-import org.apache.commons.lang.ClassUtils;
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-
 /**
- * 
  * @author 王志亮 [qieqie.wang@gmail.com]
  * @author 廖涵 [in355hz@gmail.com]
  */
@@ -115,10 +113,10 @@ public class UpdateQuerier implements Querier {
     //TODO: 支持returnGeneratedKeys
     private Object executeBatch(StatementRuntime... runtimes) {
         int[] updatedArray = new int[runtimes.length];
-        Map<String, List<StatementRuntime>> batchs = new HashMap<String, List<StatementRuntime>>();
+        Map<String, List<StatementRuntime>> batchs = new HashMap<>();
         for (int i = 0; i < runtimes.length; i++) {
             StatementRuntime runtime = runtimes[i];
-            List<StatementRuntime> batch = batchs.computeIfAbsent(runtime.getSQL(), k -> new LinkedList<StatementRuntime>());
+            List<StatementRuntime> batch = batchs.computeIfAbsent(runtime.getSQL(), k -> new LinkedList<>());
             // 该runtime在batch中的位置
             runtime.setProperty("_index_at_batch_", i);
             batch.add(runtime);
@@ -128,8 +126,7 @@ public class UpdateQuerier implements Querier {
             String sql = batch.getKey();
             List<StatementRuntime> batchRuntimes = batch.getValue();
             StatementRuntime runtime = batchRuntimes.get(0);
-            DataAccess dataAccess = dataAccessProvider.getDataAccess(
-                    runtime.getMetaData(), runtime.getProperties());
+            DataAccess dataAccess = dataAccessProvider.getDataAccess(runtime.getMetaData(), runtime.getProperties());
             List<Object[]> argsList = new ArrayList<>(batchRuntimes.size());
             for (StatementRuntime batchRuntime : batchRuntimes) {
                 argsList.add(batchRuntime.getArgs().parallelStream().toArray());
