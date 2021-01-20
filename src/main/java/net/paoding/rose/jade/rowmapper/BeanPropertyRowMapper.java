@@ -18,7 +18,11 @@ package net.paoding.rose.jade.rowmapper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.*;
+import org.springframework.beans.BeanInstantiationException;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.RowMapper;
@@ -29,7 +33,13 @@ import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.*;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * {@link RowMapper} implementation that converts a row into a new instance
@@ -194,7 +204,7 @@ public class BeanPropertyRowMapper implements RowMapper {
 
         boolean warnEnabled = logger.isWarnEnabled();
         boolean debugEnabled = logger.isDebugEnabled();
-        Set<String> populatedProperties = (checkProperties ? new HashSet<String>() : null);
+        Set<String> populatedProperties = (checkProperties ? new HashSet<>() : null);
 
         for (int index = 1; index <= columnCount; index++) {
             String column = JdbcUtils.lookupColumnName(rsmd, index).toLowerCase();
@@ -206,7 +216,12 @@ public class BeanPropertyRowMapper implements RowMapper {
                         logger.debug("Mapping column '" + column + "' to property '" + pd.getName()
                                 + "' of type " + pd.getPropertyType());
                     }
-                    bw.setPropertyValue(pd.getName(), value);
+                    // 如果字段类型为 LocalDateTime 但是value的类型为 TImestamp 时 将类型强转为 LocalDateTime
+                    if (pd.getPropertyType().equals(LocalDateTime.class) && value instanceof Timestamp) {
+                        bw.setPropertyValue(pd.getName(), ((Timestamp) value).toLocalDateTime());
+                    } else {
+                        bw.setPropertyValue(pd.getName(), value);
+                    }
                     if (populatedProperties != null) {
                         populatedProperties.add(pd.getName());
                     }
