@@ -15,18 +15,9 @@
  */
 package net.paoding.rose.jade.context.spring;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
 import net.paoding.rose.jade.dataaccess.DataAccessFactory;
-import net.paoding.rose.jade.dataaccess.DataSourceFactory;
 import net.paoding.rose.jade.dataaccess.DataAccessFactoryAdapter;
+import net.paoding.rose.jade.dataaccess.DataSourceFactory;
 import net.paoding.rose.jade.rowmapper.DefaultRowMapperFactory;
 import net.paoding.rose.jade.rowmapper.RowMapperFactory;
 import net.paoding.rose.jade.statement.Interpreter;
@@ -35,7 +26,6 @@ import net.paoding.rose.jade.statement.StatementWrapperProvider;
 import net.paoding.rose.jade.statement.cached.CacheProvider;
 import net.paoding.rose.load.ResourceRef;
 import net.paoding.rose.load.RoseScanner;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,26 +42,34 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 
+import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 /**
  * {@link JadeBeanFactoryPostProcessor}
  * 配置在发布包下的applicationContext-jade.xml中，Spring容器完成其内部的标准初始化工作后将调用本处理器，识别
  * 符合Jade规范的 DAO 接口并将之配置为Spring容器的Bean定义，加入到Spring容器中。
  * <p>
- * 
+ *
  * <h1>=开关属性的设置=</h1>
  * <p>
- * 
+ * <p>
  * jade在发布jar包时，将在发布包下的 applicationContext-jade.xml
  * 文件配置本处理器（也就说本类一定会被Spring容器执行），为使jade能够适应不同的应用环境和业务需要，jade特
  * 提供了一些系统属性设定约定，使得您可灵活地控制本处理器的行为，甚至将本处理器视为一个空处理器：
  * <p>
- * 
+ *
  * <strong>jade.context.spring</strong><br>
  * 如果设置了一个非空属性值(非空时应该填写什么值Jade不做规定)，表示jade的spring初始化工作不由本类负责。<br>
  * 所以，如果您觉得jade默认去自动扫描DAO接口并注册到Spring容器的行为是您不愿接受，您可以设置一个非空值给该属性，
  * 从而叫停jade的这个行为。
  * <p>
- * 
+ *
  * <strong>jade.context.spring.com.yourcompany.dao.UserDAO</strong><br>
  * 合法的值：0表示忽略，1表示肯定；除0和1外的设置（包括空值）都是非法的。<br>
  * 在jade的spring初始化工作由本类负责的前提下，将该属性设置为0表示该DAO不由本类负责读取并放到Spring容器中（即忽略之）；
@@ -79,14 +77,14 @@ import org.springframework.util.ResourceUtils;
  * 如果没有该系统属性，jade则读取它的上一级属性：jade.context.spring.com.yourcompany.dao
  * 并以此类推，直至 jade.context.spring.*。这类属性在Jade统称为开关属性。
  * <p>
- * 
+ *
  * <strong>jade.context.spring.*</strong><br>
  * 这个属性是所有开关属性的根，即类似 jade.context.spring.com 和 jade.context.spring.cn
  * 之类的开关属性，它的父亲是 jade.context.spring.*, 而非 jade.context.spring<br>
  * 如果没有设置这个根属性，jade 将等价于其被设置为1。您可以将之设置为0，
  * 这样就表示只有那些明确设置了开关属性为1的package或接口的类才由本处理器负责读取并放到Spring容器中。
  * <p>
- * 
+ *
  * <h1>=DAO的发现=</h1>
  * <p>
  * 首先，本处理器会调用 {@link RoseScanner#getJarOrClassesFolderResources()}
@@ -104,12 +102,12 @@ import org.springframework.util.ResourceUtils;
  * <p>
  * 通过这两个步骤，本处理器完成了对DAO接口的发现，并最后将这些接口封装为 {@link JadeFactoryBean}
  * 的形式注册到Spring容器中。
- * 
+ *
  * <h1>=数据源=</h1>
  * <p>
  * 数据源 {@link DataSource} 提供了数据库的访问接口，jade通过{@link DataSourceFactory}
  * 接口为DAO方法提供数据源，在本处利器所初始化的spring容器中，数据源的设置有两种方式：
- * 
+ *
  * <h2>==定制方式==</h2><br>
  * <ul>
  * <li>当spring容器配置了一个id/name 为 "jade.dataSourceFactory"
@@ -120,7 +118,7 @@ import org.springframework.util.ResourceUtils;
  * {@link DataSourceFactory}的个数超过1个，此时系统初始化的时侯不会跑出异常，但一旦开始进行进行DAO操作时，将抛出
  * IllegalStateException 异常。（参见 {@link SpringDataSourceFactoryDelegate}）</li>
  * </ul>
- * 
+ *
  * <h2>==默认方式==</h2><br>
  * 当spring容器没有配置任何 {@link DataSourceFactory} 时，jade将启用默认方式为DAO配置数据源，即使用
  * {@link SpringDataSourceFactory}
@@ -141,7 +139,7 @@ import org.springframework.util.ResourceUtils;
  * <li>
  * 如果以上仍未能确定UserDAO的数据源，则最终就是没有数据源，运行时将会有异常抛出</li>
  * </ul> <br>
- * 
+ *
  * <h1>=SQL解析器=</h1>
  * <p>
  * 当DAO方法被调用，执行数据库访问前，jade总是会先调用相应的SQL解析器，解析/改写SQL、设置相应的参数或运行时状态。<br>
@@ -149,7 +147,6 @@ import org.springframework.util.ResourceUtils;
  * {@link InterpreterFactory} 是 {@link SpringInterpreterFactory}。<br>
  * {@link SpringInterpreterFactory}将获取配置在Spring容器中的 {@link Interpreter}
  * ，按照标注在其上的{@link Order}排序，设置给各个DAO方法。
- * 
  * @author 王志亮 [qieqie.wang@gmail.com]
  * @author 廖涵 [in355hz@gmail.com]
  */
@@ -158,7 +155,8 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     /**
      * 开关属性前缀常量
      */
-    private static final String PROPERTY_PREFIX = "jade.context.spring";;
+    private static final String PROPERTY_PREFIX = "jade.context.spring";
+    ;
 
     /**
      * 日志记录器
@@ -168,7 +166,6 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     /**
      * 数据存取器工厂，通过它可以得到一个对数据库进行操作的实现
      * <p>
-     * 
      * @see #getDataAccessFactory(ConfigurableListableBeanFactory)
      */
     private DataAccessFactory dataAccessFactory;
@@ -176,7 +173,6 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     /**
      * 行映射器工厂，通过它可以得到一个数据库表的行映射器实现，使得从数据库读取的记录可以映射为一个对象
      * <p>
-     * 
      * @see #getRowMapperFactory()
      */
     private RowMapperFactory rowMapperFactory;
@@ -184,11 +180,10 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     /**
      * 解释器工厂，通过它可以或得一个DAO方法对应的解析器数组，这些解析器数组将解析每一次DAO操作，进行SQL解析或设置运行时状态
      * <p>
-     * 
      * @see #getInterpreterFactory(ConfigurableListableBeanFactory)
      */
     private InterpreterFactory interpreterFactory;
-    
+
     /**
      * StatmentWrapper提供者的bean名称，为“none”等价于null
      */
@@ -226,7 +221,7 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     public void setRowMapperFactory(RowMapperFactory rowMapperFactory) {
         this.rowMapperFactory = rowMapperFactory;
     }
-    
+
     public String getCacheProviderName(ConfigurableListableBeanFactory beanFactory) {
         if (cacheProviderName == null) {
             String[] names = beanFactory.getBeanNamesForType(CacheProvider.class);
@@ -273,11 +268,10 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
      * 本方法将在Spring容器完成内部的标准初始化工作后被调用，在此识别 Jade DAO
      * 接口并将配置为Spring容器的Bean定义，加入到Spring容器中。
      * <p>
-     * 
+     * <p>
      * 因为本类将配置在发布包的 applicationContext-jade.xml 文件中，所以在rose环境中，本类一定会生效！
      * 为了适应不同的应用环境，这里提供了一些机制使有更灵活的控制，请参考类级别的JavaDoc说明。
      * <p>
-     * 
      * @see BeanFactoryPostProcessor#postProcessBeanFactory(ConfigurableListableBeanFactory)
      */
     @Override
@@ -361,11 +355,10 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
      * 从获得的目录或jar包中寻找出符合规范的DAO接口，并注册到Spring容器中
      */
     private void findJadeDAODefinitions(ConfigurableListableBeanFactory beanFactory,
-            List<String> urls) {
+                                        List<String> urls) {
         JadeComponentProvider provider = new JadeComponentProvider();
         Set<String> daoClassNames = new HashSet<String>();
-
-        for (String url : urls) {
+        urls.parallelStream().forEach(url -> {
             if (logger.isInfoEnabled()) {
                 logger.info("[jade] call 'jade/find'");
             }
@@ -374,35 +367,32 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
             if (logger.isInfoEnabled()) {
                 logger.info("[jade] found " + dfs.size() + " beanDefinition from '" + url + "'");
             }
-
-            for (BeanDefinition beanDefinition : dfs) {
+            dfs.parallelStream().forEach(beanDefinition -> {
                 String daoClassName = beanDefinition.getBeanClassName();
-                if (getDisableFlag(daoClassName)) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("[jade] ignored disabled jade dao class: " + daoClassName
-                                + "  [" + url + "]");
-                    }
-                    continue;
-                }
                 if (daoClassNames.contains(daoClassName)) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("[jade] ignored replicated jade dao class: " + daoClassName
                                 + "  [" + url + "]");
                     }
-                    continue;
-                }
-                daoClassNames.add(daoClassName);
+                } else if (getDisableFlag(daoClassName)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[jade] ignored disabled jade dao class: " + daoClassName
+                                + "  [" + url + "]");
+                    }
+                } else {
+                    daoClassNames.add(daoClassName);
 
-                registerDAODefinition(beanFactory, beanDefinition);
-            }
-        }
+                    registerDAODefinition(beanFactory, beanDefinition);
+                }
+            });
+        });
     }
 
     /*
      * 将找到的一个DAO接口注册到Spring容器中
      */
-    private void registerDAODefinition(ConfigurableListableBeanFactory beanFactory,
-            BeanDefinition beanDefinition) {
+    private void registerDAODefinition(
+            ConfigurableListableBeanFactory beanFactory, BeanDefinition beanDefinition) {
         final String daoClassName = beanDefinition.getBeanClassName();
         MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
         /*
@@ -440,12 +430,9 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     protected boolean getDisableFlag(String daoType) {
         String name = daoType;
         while (true) {
-            String flag;
-            if (name.length() == 0) {
-                flag = System.getProperty(PROPERTY_PREFIX + ".*");
-            } else {
-                flag = System.getProperty(PROPERTY_PREFIX + "." + name);
-            }
+            String flag = name.length() == 0
+                    ? System.getProperty(PROPERTY_PREFIX + ".*")
+                    : System.getProperty(PROPERTY_PREFIX + "." + name);
             if (flag == null) {
                 int index = name.lastIndexOf('.');
                 if (index == -1) {
