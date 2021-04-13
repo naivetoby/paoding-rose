@@ -1,5 +1,21 @@
 # 特别鸣谢
 <a href="https://www.jetbrains.com/?from=paoding-rose-jade"><img src="idea.jpg"></a>
+# spring boot 整合 
+1. 项目中引入依赖 version需要大于[4.0.1]
+```xml
+<dependency>
+    <groupId>cn.zhangfusheng</groupId>
+    <artifactId>paoding-rose-jade</artifactId>
+    <version>4.0.1</version>
+</dependency>
+```
+2.启用禁用配置
+```yaml
+paoding:
+  rose:
+    jade:
+      enable: true # true 启用 false 禁用
+```
 # 最佳实现
 <a href='BestPractices.md'>本场最佳实践</a>
 # paoding-rose-jade DAO层使用手册

@@ -6,7 +6,7 @@
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.2</version>
+    <version>4.01</version>
     <name>paoding-rose-jade</name>
 
     <parent>
@@ -39,6 +39,7 @@
     <properties>
         <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
         <spring.version>5.2.8.RELEASE</spring.version>
+        <spring-boot.version>2.4.3</spring-boot.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -84,6 +85,18 @@
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>${hsqldb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
