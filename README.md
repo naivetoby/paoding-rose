@@ -6,7 +6,7 @@
 <dependency>
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
-    <version>4.0.1</version>
+    <version>4.01</version>
 </dependency>
 ```
 2.启用禁用配置
