@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 既 每张表都需要存在 id  create_time update_time 字段
  * 注: id 的类型 可以根据需要修改
  * @ClassName: BeanBase
- * @Author: ZFS
+ * @author ZFS
  * @Date: 2018/11/27 11:51
  */
 public interface BaseBean extends Serializable {
@@ -52,7 +52,7 @@ import java.util.Optional;
  * TABLE_NAME 对应的表名称 SELECT_COLUMN 表中的字段
  * 实现简单的CRUD查询
  * @ClassName: BaseDao
- * @Author: ZFS
+ * @author ZFS
  * @Date: 2018/11/26 16:12
  */
 public interface BaseDao<T extends BaseBean> {
@@ -595,7 +595,7 @@ import java.util.Optional;
 
 /**
  * @ClassName: BaseService
- * @Author: ZFS
+ * @author ZFS
  * @Date: 2018/12/7 11:48
  */
 public interface BaseService<T extends BaseBean> extends SimpleBaseService<T> {
@@ -892,7 +892,7 @@ import lombok.experimental.Accessors;
  * 响应数据对象
  *
  * @ClassName: BaseResponse
- * @Author: ZFS
+ * @author ZFS
  * @Date: 2018/11/27 15:03
  */
 @Data
@@ -976,7 +976,7 @@ import java.time.LocalDateTime;
 
 /**
  * @description :
- * @author: fusheng.zhang
+ * @author fusheng.zhang
  * @date: 2020-06-02 15:17:46
  */
 @Data
@@ -1045,7 +1045,7 @@ import java.util.List;
 
 /**
  * @description : 全国省市县
- * @author: fusheng.zhang
+ * @author fusheng.zhang
  * @date: 2020-03-05 16:34:27
  */
 public interface TbAddressService extends BaseService<TbAddress> {
@@ -1073,7 +1073,7 @@ import java.util.List;
 
 /**
  * @description : 全国省市县
- * @author: fusheng.zhang
+ * @author fusheng.zhang
  * @date: 2020-03-05 16:34:27
  */
 @Slf4j
@@ -1110,7 +1110,7 @@ import java.util.List;
 
 /**
  * @description :
- * @author: fusheng.zhang
+ * @author fusheng.zhang
  * @date: 2020-03-05 16:34:27
  */
 @RestController("tb/address")

@@ -88,7 +88,7 @@ import java.util.*;
 
 /**
  * @ClassName: BaseDao
- * @Author: ZFS
+ * @author ZFS
  * @Date: 2018/11/26 16:12
  */
 public interface BaseDao<T> {
