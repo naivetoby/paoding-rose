@@ -32,7 +32,7 @@ public class StatementRuntimeImpl implements StatementRuntime {
 
     private SQLCondition[] sqlCondition;
 
-    private List<Object> args = new ArrayList<>();
+    private final List<Object> args = new ArrayList<>();
 
     private Map<String, Object> properties;
 
@@ -42,7 +42,7 @@ public class StatementRuntimeImpl implements StatementRuntime {
         this.sql = metaData.getSQL();
         SQLCondition[] sqlConditions = metaData.getSqlConditions();
         if (sqlConditions != null && sqlConditions.length > 0) {
-            this.sqlCondition = Arrays.asList(sqlConditions).parallelStream().toArray(SQLCondition[]::new);
+            this.sqlCondition = sqlConditions.clone();
         }
     }
 
@@ -89,7 +89,7 @@ public class StatementRuntimeImpl implements StatementRuntime {
     @Override
     public void setProperty(String name, Object value) {
         if (properties == null) {
-            properties = new HashMap<String, Object>();
+            properties = new HashMap<>();
         }
         this.properties.put(name, value);
     }

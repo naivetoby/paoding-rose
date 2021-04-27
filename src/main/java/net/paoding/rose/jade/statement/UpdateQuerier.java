@@ -128,7 +128,7 @@ public class UpdateQuerier implements Querier {
             StatementRuntime runtime = batchRuntimes.get(0);
             DataAccess dataAccess = dataAccessProvider.getDataAccess(runtime.getMetaData(), runtime.getProperties());
             List<Object[]> argsList = new ArrayList<>(batchRuntimes.size());
-            batchRuntimes.parallelStream().forEach(batchRuntime -> argsList.add(batchRuntime.getArgs().parallelStream().toArray()));
+            batchRuntimes.forEach(batchRuntime -> argsList.add(batchRuntime.getArgs().toArray()));
             int[] batchResult = dataAccess.batchUpdate(sql, argsList);
             if (batchs.size() == 1) {
                 updatedArray = batchResult;

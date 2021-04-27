@@ -358,7 +358,7 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
                                         List<String> urls) {
         JadeComponentProvider provider = new JadeComponentProvider();
         Set<String> daoClassNames = new HashSet<String>();
-        urls.parallelStream().forEach(url -> {
+        urls.forEach(url -> {
             if (logger.isInfoEnabled()) {
                 logger.info("[jade] call 'jade/find'");
             }
@@ -367,7 +367,7 @@ public class JadeBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
             if (logger.isInfoEnabled()) {
                 logger.info("[jade] found " + dfs.size() + " beanDefinition from '" + url + "'");
             }
-            dfs.parallelStream().forEach(beanDefinition -> {
+            dfs.forEach(beanDefinition -> {
                 String daoClassName = beanDefinition.getBeanClassName();
                 if (daoClassNames.contains(daoClassName)) {
                     if (logger.isDebugEnabled()) {
