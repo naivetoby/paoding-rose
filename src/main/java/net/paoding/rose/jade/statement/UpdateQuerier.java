@@ -56,12 +56,12 @@ public class UpdateQuerier implements Querier {
     }
 
     @Override
-    public Object execute(SQLType sqlType, StatementRuntime... runtimes) {
+    public Object execute(SQLType sqlType, Boolean batchUpdate, StatementRuntime... runtimes) {
         switch (runtimes.length) {
             case 0:
                 return 0;
             case 1:
-                return executeSingle(runtimes[0], returnType);
+                return batchUpdate ? executeBatch(runtimes) : executeSingle(runtimes[0], returnType);
             default:
                 return executeBatch(runtimes);
         }

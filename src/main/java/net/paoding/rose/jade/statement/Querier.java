@@ -18,12 +18,10 @@ package net.paoding.rose.jade.statement;
 import net.paoding.rose.jade.annotation.SQLType;
 
 /**
- * 
  * @author qieqie
- * 
  */
 public interface Querier {
 
-    Object execute(SQLType sqlType, StatementRuntime... runtimes);
+    Object execute(SQLType sqlType, Boolean batchUpdate, StatementRuntime... runtimes);
 
 }

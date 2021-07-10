@@ -59,7 +59,7 @@ public class SelectQuerier implements Querier {
     }
 
     @Override
-    public Object execute(SQLType sqlType, StatementRuntime... runtimes) {
+    public Object execute(SQLType sqlType, Boolean batchUpdate, StatementRuntime... runtimes) {
         return execute(runtimes[0]);
     }
 

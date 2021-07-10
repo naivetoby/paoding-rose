@@ -130,7 +130,7 @@ public class JdbcStatement implements Statement {
                 runtimes.add(runtime);
                 index++;
             }
-            result = querier.execute(sqlType, runtimes.toArray(new StatementRuntime[0]));
+            result = querier.execute(sqlType, batchUpdate, runtimes.toArray(new StatementRuntime[0]));
             result = afterInvocationCallback.execute(runtimes.get(0), result);
         } else {
             StatementRuntime runtime = new StatementRuntimeImpl(metaData, parameters);
@@ -138,7 +138,7 @@ public class JdbcStatement implements Statement {
                 interpreter.interpret(runtime);
             }
             log(parameters, runtime);
-            result = querier.execute(sqlType, runtime);
+            result = querier.execute(sqlType, batchUpdate, runtime);
             result = afterInvocationCallback.execute(runtime, result);
         }
         if (metaData.getReturnType() == Optional.class && result == null) {
