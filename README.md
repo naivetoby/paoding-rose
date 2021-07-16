@@ -19,6 +19,10 @@ paoding:
 # 最佳实现
 <a href='BestPractices.md'>本场最佳实践</a>
 # paoding-rose-jade DAO层使用手册
+## 注:
+```
+1. 验证集合不为null且长度>0    :list != null and :list.length>0
+```
 ## jdk 需要 1.8以上版本
 ## 功能
 ```
