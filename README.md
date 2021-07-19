@@ -21,7 +21,7 @@ paoding:
 # paoding-rose-jade DAO层使用手册
 ## 注:
 ```
-1. 验证集合不为null且长度>0    :list != null and :list.length>0
+1. 验证[数组]不为null且长度>0    :ls != null and :ls.length>0
 ```
 ## jdk 需要 1.8以上版本
 ## 功能
