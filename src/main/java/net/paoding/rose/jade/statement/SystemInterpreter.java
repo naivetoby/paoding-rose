@@ -52,7 +52,7 @@ public class SystemInterpreter implements Interpreter {
                 ArrayList<String> valueList;
                 ExqlPattern sqlAndPattern;
                 ExqlContextImpl sqlAndContext;
-                boolean appendWhere = true, appendCondition = true;
+                boolean appendWhere = true;
                 for (SQLCondition sqlCondition : sqlConditions) {
                     value = sqlCondition.value();
                     condition = sqlCondition.condition();
@@ -67,13 +67,9 @@ public class SystemInterpreter implements Interpreter {
                             sqlAndPattern.execute(sqlAndContext, parameters, constants);
                             String sqlConditionStr = sqlAndContext.flushOut();
                             if (StringUtils.isNotBlank(sqlConditionStr)) {
-                                if (appendWhere && StringUtils.isNotBlank(condition)) {
-                                    sql.append(" where ");
+                                if (appendWhere && StringUtils.isNotBlank(condition) && sqlCondition.appendWhere()) {
+                                    sql.append(" where ").append(sqlConditionStr);
                                     appendWhere = false;
-                                }
-                                if (appendCondition) {
-                                    sql.append(sqlConditionStr);
-                                    appendCondition = false;
                                 } else {
                                     sql.append(" ").append(condition).append(" ").append(sqlConditionStr);
                                 }

@@ -8,9 +8,8 @@ package net.paoding.rose.jade.annotation.condition;
 public @interface SQLCondition {
 
     /**
-     * and 或者 or
-     * 注: 目前只测试了 and 和 or的使用
-     * 注: 支持 order by 和 limit ,当值为order by  或者 limit 时,此处需要赋值为空穿,具体的分页和排序 需要写在 value中
+     * and or between and ...  可以跟在 where后的sql 关键字
+     * order by limit ... 非where后的关键字,需要设置 {@link #appendWhere()}为false
      * @return
      */
     String condition() default "and";
@@ -27,4 +26,11 @@ public @interface SQLCondition {
      * @return
      */
     String[] values() default {};
+
+    /**
+     * 该组的 value 前是否可以追加 where
+     * {@link #condition()} condition 是否为可跟在where条件内的关键字
+     * @return
+     */
+    boolean appendWhere() default true;
 }
