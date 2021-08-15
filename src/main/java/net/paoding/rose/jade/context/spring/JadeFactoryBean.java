@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Proxy;
+import java.util.Objects;
 
 /**
  * @author 王志亮 [qieqie.wang@gmail.com]
@@ -48,11 +49,22 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
 
     protected Object daoObject;
 
+    private ClassLoader classLoader;
+
     // 可选的
     private StatementWrapperProvider statementWrapperProvider;
 
     public JadeFactoryBean() {
     }
+
+    public ClassLoader getClassLoader() {
+        return this.classLoader;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
 
     @Override
     public Class<?> getObjectType() {
@@ -140,11 +152,10 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
         try {
             DAOMetaData daoMetaData = new DAOMetaData(objectType);
             JadeInvocationHandler handler = new JadeInvocationHandler(
-                    //
                     daoMetaData, interpreterFactory, rowMapperFactory, dataAccessFactory,
                     cacheProvider, statementWrapperProvider);
-            return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
-                    new Class[]{objectType}, handler);
+            ClassLoader classLoader = Objects.nonNull(this.classLoader) ? this.classLoader : ClassUtils.getDefaultClassLoader();
+            return Proxy.newProxyInstance(classLoader, new Class[]{objectType}, handler);
         } catch (RuntimeException e) {
             throw new IllegalStateException("failed to create bean for "
                     + this.objectType.getName(), e);
