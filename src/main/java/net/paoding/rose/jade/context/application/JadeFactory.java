@@ -16,6 +16,7 @@
 package net.paoding.rose.jade.context.application;
 
 import java.lang.reflect.Proxy;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -34,9 +35,7 @@ import net.paoding.rose.jade.statement.cached.CacheProvider;
 import org.springframework.util.ClassUtils;
 
 /**
- * 
  * @author qieqie
- * 
  */
 //BUG: @SQL中的 :1.create_date应该抛出错误而非返回null
 public class JadeFactory {
@@ -51,6 +50,8 @@ public class JadeFactory {
 
     // 可选的
     private StatementWrapperProvider statementWrapperProvider;
+
+    private ClassLoader classLoader;
 
     public JadeFactory() {
     }
@@ -100,12 +101,10 @@ public class JadeFactory {
     public <T> T create(Class<?> daoClass) {
         try {
             DAOMetaData daoMetaData = new DAOMetaData(daoClass);
-            JadeInvocationHandler handler = new JadeInvocationHandler(
-                    //
-                    daoMetaData, interpreterFactory, rowMapperFactory, dataAccessFactory,
-                    cacheProvider, statementWrapperProvider);
-            ClassLoader classLoader = ClassUtils.getDefaultClassLoader();
-            return (T) Proxy.newProxyInstance(classLoader, new Class[] { daoClass }, handler);
+            ClassLoader classLoader = Objects.nonNull(this.classLoader) ? this.classLoader : ClassUtils.getDefaultClassLoader();
+            JadeInvocationHandler handler = new JadeInvocationHandler(classLoader, daoMetaData, interpreterFactory,
+                    rowMapperFactory, dataAccessFactory, cacheProvider, statementWrapperProvider);
+            return (T) Proxy.newProxyInstance(classLoader, new Class[]{daoClass}, handler);
         } catch (RuntimeException e) {
             throw new IllegalStateException("failed to create bean for " + daoClass.getName(), e);
         }

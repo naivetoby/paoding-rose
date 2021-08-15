@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -41,7 +42,7 @@ public class JadeInvocationHandler implements InvocationHandler {
 
     private static final Log logger = LogFactory.getLog(JadeInvocationHandler.class);
 
-    private final ConcurrentHashMap<Method, Statement> statements = new ConcurrentHashMap<Method, Statement>();
+    private final ConcurrentHashMap<Method, Statement> statements = new ConcurrentHashMap<>();
 
     private final DAOMetaData daoMetaData;
 
@@ -55,13 +56,17 @@ public class JadeInvocationHandler implements InvocationHandler {
 
     private final StatementWrapperProvider statementWrapperProvider;
 
-    public JadeInvocationHandler(//
-                                 DAOMetaData daoMetaData,//
-                                 InterpreterFactory interpreterFactory, //
-                                 RowMapperFactory rowMapperFactory,//
-                                 DataAccessFactory dataAccessFactory,//
-                                 CacheProvider cacheProvider, //
-                                 StatementWrapperProvider statementWrapperProvider) {
+    private final ClassLoader classLoader;
+
+    public JadeInvocationHandler(
+            ClassLoader classLoader,
+            DAOMetaData daoMetaData,
+            InterpreterFactory interpreterFactory,
+            RowMapperFactory rowMapperFactory,
+            DataAccessFactory dataAccessFactory,
+            CacheProvider cacheProvider,
+            StatementWrapperProvider statementWrapperProvider) {
+        this.classLoader = classLoader;
         this.daoMetaData = daoMetaData;
         this.rowMapperFactory = rowMapperFactory;
         this.dataAccessFactory = dataAccessFactory;
@@ -92,9 +97,9 @@ public class JadeInvocationHandler implements InvocationHandler {
         Map<String, Object> parameters;
         StatementMetaData statemenetMetaData = statement.getMetaData();
         if (args == null || args.length == 0) {
-            parameters = new HashMap<String, Object>(4);
+            parameters = new HashMap<>(4);
         } else {
-            parameters = new HashMap<String, Object>(args.length * 2 + 4);
+            parameters = new HashMap<>(args.length * 2 + 4);
             for (int i = 0; i < args.length; i++) {
                 parameters.put(INDEX_NAMES[i], args[i]);
                 SQLParam sqlParam = statemenetMetaData.getSQLParamAt(i);
@@ -112,10 +117,12 @@ public class JadeInvocationHandler implements InvocationHandler {
     }
 
     private Statement getStatement(Method method) {
-        Statement statement = null;//statements.get(method);
-        if (statement == null) {
-            synchronized (method) {
-                statement = null;//statements.get(method);
+        Statement statement = statements.get(method);
+        if (Objects.nonNull(statement)) {
+            return statement;
+        } else {
+            synchronized (statements) {
+                statement = statements.get(method);
                 if (statement == null) {
                     StatementMetaData smd = new StatementMetaData(daoMetaData, method);
                     SQLType sqlType = smd.getSQLType();

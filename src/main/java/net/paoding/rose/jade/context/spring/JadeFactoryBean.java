@@ -151,9 +151,8 @@ public class JadeFactoryBean implements FactoryBean, InitializingBean {
     protected Object createDAO() {
         try {
             DAOMetaData daoMetaData = new DAOMetaData(objectType);
-            JadeInvocationHandler handler = new JadeInvocationHandler(
-                    daoMetaData, interpreterFactory, rowMapperFactory, dataAccessFactory,
-                    cacheProvider, statementWrapperProvider);
+            JadeInvocationHandler handler = new JadeInvocationHandler(classLoader, daoMetaData, interpreterFactory,
+                    rowMapperFactory, dataAccessFactory, cacheProvider, statementWrapperProvider);
             ClassLoader classLoader = Objects.nonNull(this.classLoader) ? this.classLoader : ClassUtils.getDefaultClassLoader();
             return Proxy.newProxyInstance(classLoader, new Class[]{objectType}, handler);
         } catch (RuntimeException e) {
