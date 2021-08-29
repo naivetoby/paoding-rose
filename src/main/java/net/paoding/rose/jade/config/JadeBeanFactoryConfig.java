@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
  * @Description
  * @create 2020-03-24 15:57:00
  */
-@Configuration
-@ConditionalOnProperty(prefix = "paoding.rose.jade", name = "enable", havingValue = "true")
+// @Configuration
+// @ConditionalOnProperty(prefix = "paoding.rose.jade", name = "enable", havingValue = "true")
 public class JadeBeanFactoryConfig extends JadeBeanFactoryPostProcessor {
 
 }
