@@ -9,12 +9,10 @@
     <version>4.01</version>
 </dependency>
 ```
-2.启用禁用配置
-```yaml
-paoding:
-  rose:
-    jade:
-      enable: true # true 启用 false 禁用
+2.启用禁用
+```java
+// # 使用注解
+@EnablePaodingRoseJade
 ```
 # 最佳实现
 <a href='BestPractices.md'>本场最佳实践</a>

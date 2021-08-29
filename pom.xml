@@ -6,7 +6,7 @@
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.5</version>
+    <version>4.0.6</version>
     <name>paoding-rose-jade</name>
 
     <parent>
