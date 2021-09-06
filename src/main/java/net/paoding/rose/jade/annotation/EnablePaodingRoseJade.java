@@ -1,7 +1,8 @@
 package net.paoding.rose.jade.annotation;
 
-import net.paoding.rose.jade.context.spring.JadeBeanFactoryPostProcessor;
+import net.paoding.rose.jade.context.spring.JadeBeanFactoryRegister;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -16,7 +17,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(JadeBeanFactoryPostProcessor.class)
+@Import(JadeBeanFactoryRegister.class)
 public @interface EnablePaodingRoseJade {
+
+    @AliasFor("basePackage")
+    String[] value() default {};
+
+    String[] basePackage() default {};
 
 }

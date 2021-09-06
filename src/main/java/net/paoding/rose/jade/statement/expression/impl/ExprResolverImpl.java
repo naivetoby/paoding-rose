@@ -7,7 +7,6 @@ import org.apache.commons.jexl.JexlContext;
 import org.apache.commons.jexl.JexlHelper;
 import org.apache.commons.lang.math.NumberUtils;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -220,55 +219,4 @@ public class ExprResolverImpl implements ExprResolver {
         mapVars.put(variant, value);
     }
 
-    // 进行简单测试
-    public static void main(String... args) throws Exception {
-
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        map.put("current", new Date());
-        map.put("numbers", new Integer[]{1, 2, 3, 5, 8, 13, 21, 34});
-        map.put("index", 5);
-        map.put(":2", 2);
-        map.put("map", map);
-
-        ExprResolver exprResolver = new ExprResolverImpl(map, map);
-
-
-        System.out.println("map['index']=" +  // NL
-                exprResolver.executeExpr(":map[index]"));
-        System.out.println("numbers[5]=" +  // NL
-                exprResolver.executeExpr(":map[numbers][5]"));
-
-        System.out.println( // NL
-                exprResolver.executeExpr( // NL
-                        "$numbers[:index] + :2"));
-        System.out.println( // NL
-                exprResolver.executeExpr( // NL
-                        ":current.year - ($current.month + $current.day) - :2"));
-        System.out.println( // NL
-                exprResolver.executeExpr( // NL
-                        ":current.year - ($current.month + $current.day) + $numbers[:index] + :2"));
-    }
-
-    public static void main2(String[] args) {
-        StringBuilder sb = new StringBuilder(100 * 2);
-        String ex = ":1.id[id.kkj][idkkj], :2[name], :3[age], :3[4]";
-        Matcher m = MAP_PATTERN.matcher(ex);
-        int index = 0;
-        while (m.find()) {
-            sb.append(ex.substring(index, m.start()));
-            String t = m.group(1);
-            if (!NumberUtils.isDigits(t)) {
-                sb.append("['");
-                sb.append(m.group(1));
-                sb.append("']");
-            } else {
-                sb.append(m.group(0));
-            }
-            index = m.end();
-        }
-        sb.append(ex.substring(index));
-        System.out.println(sb);
-
-    }
 }
