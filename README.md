@@ -1,5 +1,7 @@
 # 特别鸣谢
 <a href="https://www.jetbrains.com/?from=paoding-rose-jade"><img src="idea.jpg"></a>
+# 2021-09-06
+* 修改扫描方式,不在限制DAO结尾
 # spring boot 整合 
 1. 项目中引入依赖 version需要大于[4.0.1]
 ```xml
