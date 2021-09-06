@@ -244,7 +244,7 @@ public class StatementMetaData {
         return daoMetaData.getDAOClass().getName() + '#' + method.getName();
     }
 
-    private static Pattern[] SELECT_PATTERNS = new Pattern[]{
+    private static final Pattern[] SELECT_PATTERNS = new Pattern[]{
             Pattern.compile("^\\s*SELECT.*", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^\\s*GET.*", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^\\s*FIND.*", Pattern.CASE_INSENSITIVE),

@@ -38,14 +38,11 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class SpringDataSourceFactory implements DataSourceFactory, ApplicationContextAware {
 
-    private Log logger = LogFactory.getLog(getClass());
+    private final Log logger = LogFactory.getLog(getClass());
 
     private ListableBeanFactory applicationContext;
 
-    private ConcurrentHashMap<Class<?>, DataSourceHolder> cachedDataSources = new ConcurrentHashMap<Class<?>, DataSourceHolder>();
-
-    public SpringDataSourceFactory() {
-    }
+    private final ConcurrentHashMap<Class<?>, DataSourceHolder> cachedDataSources = new ConcurrentHashMap<Class<?>, DataSourceHolder>();
 
     public SpringDataSourceFactory(ListableBeanFactory applicationContext) {
         this.applicationContext = applicationContext;
