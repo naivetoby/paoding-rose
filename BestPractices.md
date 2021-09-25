@@ -1,5 +1,7 @@
 # paoding-rose-jade 最佳实践
-* baseBean.java
+
+## baseBean.java
+
 ```java
 package cn.zhangfusheng.base.model;
 
@@ -30,7 +32,9 @@ public interface BaseBean extends Serializable {
 
 }
 ```
-* baseDao
+
+## baseDao
+
 ```java
 package cn.zhangfusheng.base.server.dao;
 
@@ -204,7 +208,9 @@ public interface BaseDao<T extends BaseBean> {
 
 }
 ```
-* PageRequest
+
+## PageRequest
+
 ```java
 package cn.zhangfusheng.base.page;
 
@@ -303,7 +309,9 @@ public class PageRequest {
     }
 }
 ```
-* PageResponse
+
+## PageResponse
+
 ```java
 package cn.zhangfusheng.base.page;
 
@@ -366,7 +374,9 @@ public class PageResponse<T> extends PageRequest {
     }
 }
 ```
-* SortBy
+
+## SortBy
+
 ```java
 package cn.zhangfusheng.base.page;
 
@@ -398,13 +408,18 @@ public class SortBy {
     private String sortOrder = DESC;
 }
 ```
+
 > ======================================================================================================================
-> ================================经过上述的公共方法的抽取已经可以实现部分crud            ======================================
+> ================================经过上述的公共方法的抽取已经可以实现部分crud ======================================
 > ================================下边给出spring boot 整合 paoding-rose-jade 的最佳实践=====================================
 > ======================================================================================================================
+
 ## 自定义spring boot 的部分注解
-### 自定义 autowired 方便bean的注入__SimpleBaseService.getJadeDAO(),BaseController.getBaseService()
-* Autowired
+
+> 自定义 autowired 方便bean的注入__SimpleBaseService.getJadeDAO(),BaseController.getBaseService()
+
+### Autowired
+
 ```java
 package cn.zhangfusheng.base.server.core.annotation.bean;
 
@@ -443,7 +458,9 @@ public @interface Autowired {
 }
 
 ```
-* Like 实现字段的模糊查询
+
+### Like 实现字段的模糊查询
+
 ```java
 package cn.zhangfusheng.base.annotation.sql;
 
@@ -477,9 +494,13 @@ public @interface Like {
     String suffix() default "%";
 }
 ```
-### 简单的CRUD 抽取
-* BaseDao __ 使用 上方的 baseDao 即可
-* SimpleBaseService
+
+## 简单的CRUD 抽取
+
+> BaseDao __ 使用 上方的 baseDao 即可
+
+#### SimpleBaseService
+
 ```java
 package cn.zhangfusheng.base.server.service;
 
@@ -573,7 +594,9 @@ public interface SimpleBaseService<T extends BaseBean> {
 }
 
 ```
-* BaseService
+
+#### BaseService
+
 ```java
 package cn.zhangfusheng.base.server.service;
 
@@ -770,7 +793,9 @@ public interface BaseService<T extends BaseBean> extends SimpleBaseService<T> {
     }
 }
 ```
-* BaseController
+
+#### BaseController
+
 ```java
 package cn.zhangfusheng.base.server.controller;
 
@@ -881,7 +906,9 @@ public interface BaseController<T extends BaseBean> {
 
 }
 ```
-* BaseResponse
+
+#### BaseResponse
+
 ```java
 package cn.zhangfusheng.base.response;
 
@@ -955,11 +982,15 @@ public class BaseResponse<T> {
     }
 }
 ```
+
 > ======================================================================================================================
 > ================================来个demo展示一下========================================================================
 > ======================================================================================================================
+
 ### demo
+
 * TbAddress (需要implements BaseBean)
+
 ```java
 package cn.zhangfusheng.user.model;
 
@@ -972,6 +1003,7 @@ import lombok.experimental.Accessors;
 
 
 import cn.zhangfusheng.base.annotation.valid.NotNull;
+
 import java.time.LocalDateTime;
 
 /**
@@ -1034,7 +1066,9 @@ public class TbAddress implements BaseBean {
 
 }
 ```
+
 * TbAddressService (extends BaseService)
+
 ```java
 package cn.zhangfusheng.user.server.service.address;
 
@@ -1058,7 +1092,9 @@ public interface TbAddressService extends BaseService<TbAddress> {
 
 }
 ```
+
 * TbAddressServiceImpl (implements TbAddressService)
+
 ```java
 package cn.zhangfusheng.user.server.service.address.impl;
 
@@ -1089,7 +1125,9 @@ public class TbAddressServiceImpl implements TbAddressService {
     }
 }
 ```
+
 * TbAddressController (implements BaseController)
+
 ```java
 package cn.zhangfusheng.user.server.controller.address;
 
@@ -1131,4 +1169,5 @@ public class TbAddressController implements BaseController<TbAddress> {
     }
 }
 ```
+
 > demo结束,实现了基本的CRUD,以及部分字段的模糊搜索等等,其他复杂的接口还需要自主编写
