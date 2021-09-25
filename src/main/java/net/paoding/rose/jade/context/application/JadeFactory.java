@@ -38,11 +38,12 @@ import org.springframework.util.ClassUtils;
  * @author qieqie
  */
 //BUG: @SQL中的 :1.create_date应该抛出错误而非返回null
+@Deprecated
 public class JadeFactory {
 
     private RowMapperFactory rowMapperFactory = new DefaultRowMapperFactory();
 
-    private DefaultInterpreterFactory interpreterFactory = new DefaultInterpreterFactory();
+    private final DefaultInterpreterFactory interpreterFactory = new DefaultInterpreterFactory();
 
     private DataAccessFactoryAdapter dataAccessFactory;
 

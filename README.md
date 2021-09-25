@@ -1,40 +1,62 @@
 # 特别鸣谢
+
 <a href="https://www.jetbrains.com/?from=paoding-rose-jade"><img src="idea.jpg"></a>
+
 # 2021-09-06
+
 * 修改扫描方式,不在限制DAO结尾
-# spring boot 整合 
+
+# spring boot 整合
+
 1. 项目中引入依赖 version需要大于[4.0.1]
+
 ```xml
+
 <dependency>
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
     <version>4.01</version>
 </dependency>
 ```
+
 2.启用禁用
+
 ```java
 // # 使用注解
 @EnablePaodingRoseJade
 ```
+
 # 最佳实现
+
 <a href='BestPractices.md'>本场最佳实践</a>
+
 # paoding-rose-jade DAO层使用手册
+
 ## 注:
+
 ```
 1. 验证[数组]不为null且长度>0    :ls != null and :ls.length>0
 ```
+
 ## jdk 需要 1.8以上版本
+
 ## 功能
+
 ```
 1. 支持jade 原生的语法 具体用法请参考 1.0 语法支持
 2. 支持 条件语句封装 具体用法参考 2.0 ,[想象MyBatis 的xml一样,自动的添加 关键字]
 3. 支持Option返回值 参考3.0
+4. 通过EnablePaodingRoseJade注解启用,版本号 > 4.0.7
 ```
+
 ## 特别说明
+
 ```
 文档中还存在 1=1 的情况也在 2.0.1 version 中解决,具体请参考文档中的2.0
 ``` 
+
 ## 语法
+
 * 1.0 语法支持
     * 1.1 变量赋值
         * 1.1.1 冒号[:] 表示这是一个变量,例如例子中 :limit
@@ -42,7 +64,7 @@
          @SQL("SELECT user_id, device_token FROM test_table LIMIT :limit")
          public List<Test> getTests(@SQLParam("limit") int limit);
         ```
-      * 1.1.2 :1 :2 ....的语法使用
+        * 1.1.2 :1 :2 ....的语法使用
       ```java
       @SQL("SELECT user_id, device_token FROM test_table LIMIT :1")
       public List<Test> getTests(int limit);
@@ -56,7 +78,7 @@
         @SQL("SELECT user_id, device_token FROM test_##(:tableName) where user_name = :user.userName")
         public List<Test> getTests(@SQLParam("tableName") String tableName, @SQLParam("user")User user);
         ```
-    * 1.3 条件表达式 #if(){}  #if(){}#else{}
+    * 1.3 条件表达式 #if(){} #if(){}#else{}
     ```java
     // #if(){}
     @SQL("SELECT user_id, device_token FROM test_user #if(:user!=null){ where user_name = :user.userName}")
@@ -77,7 +99,9 @@
      @SQL("SELECT user_id, device_token FROM test_user where user_name like CONCAT('%',:userName,'%')")
      public List<Test> getTestsByIds(@SQLParam("userName") String userName);
     ```
+
 ## baseDao 公共方法的抽取
+
 ```java
 package cn.zhangfusheng.base.server.dao;
 
@@ -222,7 +246,9 @@ public interface BaseDao<T> {
 
 }
 ```
+
 ## PageRequest 分页相关参数封装
+
 ```java
 package cn.zhangfusheng.base.page;
 
@@ -318,7 +344,9 @@ public class PageRequest {
     }
 }
 ```
+
 ## PageResponse
+
 ```java
 package cn.zhangfusheng.base.page;
 
@@ -381,7 +409,9 @@ public class PageResponse<T> extends PageRequest {
 }
 
 ```
+
 ## sortBy 字段排序配置
+
 ```java
 package cn.zhangfusheng.base.page;
 
@@ -412,100 +442,104 @@ public class SortBy {
     private String sortOrder = DESC;
 }
 ```
+
 * 2.0 调整@SQL注解,添加SQLCondition注解,具体用法如下
+
 ```java
         // SELECT_SQL 为BaseDAO中提取的公共的sql模板
-        final static String TABLE_NAME = "tb_user";
-        final static String SELECT_COLUMN = "`id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`";
-    
-        /**
-         * 产生sql:
-         * select `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
-         * from `tb_user`
-         * where user_name = '123' and phone = '456' and id in (1001) or province_id=1 or (province_id=1 or id in (1001))
-         * @param tbUser
-         * @return
-         */
-        @SQL(
-                value = SELECT_SQL,
-                condition = {
-                        @SQLCondition("#if(:vo.userName!=null){user_name = :vo.userName}"),
-                        @SQLCondition("#if(:vo.phone!=null){phone = :vo.phone}"),
-                        @SQLCondition("#if(:vo.id!=null){id in (:vo.id)}"),
-                        @SQLCondition(value = "#if(:vo.provinceId!=null){province_id=:vo.provinceId}", condition = "or"),
-                        @SQLCondition(value = "#if(:vo.provinceId!=null){(province_id=:vo.provinceId or id in (:vo.id))}", condition = "or"),
-                }
-        )
+final static String TABLE_NAME="tb_user";
+final static String SELECT_COLUMN="`id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`";
+
+/**
+ * 产生sql:
+ * select `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+ * from `tb_user`
+ * where user_name = '123' and phone = '456' and id in (1001) or province_id=1 or (province_id=1 or id in (1001))
+ * @param tbUser
+ * @return
+ */
+@SQL(
+        value = SELECT_SQL,
+        condition = {
+                @SQLCondition("#if(:vo.userName!=null){user_name = :vo.userName}"),
+                @SQLCondition("#if(:vo.phone!=null){phone = :vo.phone}"),
+                @SQLCondition("#if(:vo.id!=null){id in (:vo.id)}"),
+                @SQLCondition(value = "#if(:vo.provinceId!=null){province_id=:vo.provinceId}", condition = "or"),
+                @SQLCondition(value = "#if(:vo.provinceId!=null){(province_id=:vo.provinceId or id in (:vo.id))}", condition = "or"),
+        }
+)
         List<TbUser> find(@SQLParam("vo") TbUser tbUser);
-    
-    
-        /**
-         * 产生sql
-         * select
-         * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
-         * from `tb_user`
-         * where id in (1,2,3,4,5)
-         * @param ids
-         * @return
-         */
-        @SQL(
-                value = SELECT_SQL, condition = {
-                @SQLCondition("#if(:1!=null){id in (:1)}"),
-        })
+
+
+/**
+ * 产生sql
+ * select
+ * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+ * from `tb_user`
+ * where id in (1,2,3,4,5)
+ * @param ids
+ * @return
+ */
+@SQL(
+        value = SELECT_SQL, condition = {
+        @SQLCondition("#if(:1!=null){id in (:1)}"),
+})
         List<TbUser> findByIds(List<Integer> ids);
-    
-        /**
-         * 产生sql:
-         * select
-         * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
-         * from `tb_user`
-         * where
-         * user_name in ('1','2','3','4','5')
-         * @param names
-         * @return
-         */
-        @SQL(
-                value = SELECT_SQL, condition = {
-                @SQLCondition("#if(:1!=null){user_name in (:1)}"),
-        })
+
+/**
+ * 产生sql:
+ * select
+ * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+ * from `tb_user`
+ * where
+ * user_name in ('1','2','3','4','5')
+ * @param names
+ * @return
+ */
+@SQL(
+        value = SELECT_SQL, condition = {
+        @SQLCondition("#if(:1!=null){user_name in (:1)}"),
+})
         List<TbUser> findByNames(List<String> names);
-    
-        /**
-         * 产生sql:
-         * select
-         * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
-         * from `tb_user`
-         * where
-         * id in (1,2,3,4,5) and id in (1,2,3,4,5) and user_name in ('1','2','3','4','5')
-         * @param names
-         * @param ids
-         * @return
-         */
-        @SQL(
-                value = SELECT_SQL,
-                condition = {
-                        @SQLCondition(value = "#if(:2!=null){id in (:2)}", values = {"#if(:2!=null){id in (:2)}", "#if(:1!=null){user_name in (:1)}"})
-                }
-        )
-        List<TbUser> findByNamesAndId(List<String> names, List<Integer> ids);
-        
-        /**
-         * 分页 或者排序
-         * @param departmentVo
-         * @param pageRequest
-         * @return
-         */
-        @SQL(value = SELECT_SQL,
-                condition = {
-                        @SQLCondition("#if(:vo.companyId!=null){company_id=:vo.companyId}"),
-                        @SQLCondition("#if(:vo.name!=null){department_name like CONCAT('%',:vo.name,'%')}"),
-                        @SQLCondition(value = "id", condition = "order by", appendWhere = false),
-                        @SQLCondition(value = "#if(:pageRequest != null){:pageRequest.startNum,:pageRequest.pageSize}", condition = "LIMIT", appendWhere = false),
-                }
-        )
-        List<TbDepartment> find(@SQLParam("vo") QueryDepartmentVo departmentVo, @SQLParam("pageRequest") PageRequest pageRequest);
+
+/**
+ * 产生sql:
+ * select
+ * `id`,`user_name`,`phone`,`password`,`head_img`,`province_id`,`province_name`,`city_id`,`city_name`,`area_id`,`area_name`,`address`,`status`,`create_time`,`update_time`
+ * from `tb_user`
+ * where
+ * id in (1,2,3,4,5) and id in (1,2,3,4,5) and user_name in ('1','2','3','4','5')
+ * @param names
+ * @param ids
+ * @return
+ */
+@SQL(
+        value = SELECT_SQL,
+        condition = {
+                @SQLCondition(value = "#if(:2!=null){id in (:2)}", values = {"#if(:2!=null){id in (:2)}", "#if(:1!=null){user_name in (:1)}"})
+        }
+)
+        List<TbUser> findByNamesAndId(List<String> names,List<Integer> ids);
+
+/**
+ * 分页 或者排序
+ * @param departmentVo
+ * @param pageRequest
+ * @return
+ */
+@SQL(value = SELECT_SQL,
+        condition = {
+                @SQLCondition("#if(:vo.companyId!=null){company_id=:vo.companyId}"),
+                @SQLCondition("#if(:vo.name!=null){department_name like CONCAT('%',:vo.name,'%')}"),
+                @SQLCondition(value = "id", condition = "order by", appendWhere = false),
+                @SQLCondition(value = "#if(:pageRequest != null){:pageRequest.startNum,:pageRequest.pageSize}", condition = "LIMIT", appendWhere = false),
+        }
+)
+        List<TbDepartment> find(@SQLParam("vo") QueryDepartmentVo departmentVo,@SQLParam("pageRequest") PageRequest pageRequest);
 ```
+
 * 3.0 调整返回值支持Optional<T>返回值
+
 ```java
 @SQL(SELECT_SQL + "where id = :id")
 Optional<T> queryById(@SQLParam("id") Integer id);
