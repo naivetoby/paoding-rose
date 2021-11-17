@@ -6,7 +6,7 @@
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
     <packaging>jar</packaging>
-    <version>5.0.0</version>
+    <version>5.0.1</version>
     <name>paoding-rose-jade</name>
 
     <parent>
@@ -127,18 +127,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
-    <!--<distributionManagement>
-        <repository>
-            <id>ali-rdc-releases</id>
-            <url>https://repo.rdc.aliyun.com/repository/128147-release-XAwKUr/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ali-rdc-snapshots</id>
-            <url>https://repo.rdc.aliyun.com/repository/128147-snapshot-qwChov/</url>
-        </snapshotRepository>
-    </distributionManagement>-->
 
 </project>
