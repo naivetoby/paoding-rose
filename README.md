@@ -548,6 +548,7 @@ Optional<T> queryById(@SQLParam("id") Integer id);
 
 * 4.0 支持jpa查询
   > 具体使用模拟jpa的使用即可
+  > 暂时为支持 orderBy 
 
     * 当使用jpa的方式的时候.要注意一下内容
         * 方法上存在注解 SqlJpa 时,将使用注解配置的要查询的字段和表,此配置优先级最高.
