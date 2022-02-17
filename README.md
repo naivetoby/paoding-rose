@@ -47,6 +47,7 @@
 2. 支持 条件语句封装 具体用法参考 2.0 ,[想象MyBatis 的xml一样,自动的添加 关键字]
 3. 支持Option返回值 参考3.0
 4. 通过EnablePaodingRoseJade注解启用,版本号 > 4.0.7
+5. 支持jpa方式查询,具体参考 4.0.版本号 >= 5.0.2
 ```
 
 ## 特别说明
@@ -543,4 +544,30 @@ final static String SELECT_COLUMN="`id`,`user_name`,`phone`,`password`,`head_img
 ```java
 @SQL(SELECT_SQL + "where id = :id")
 Optional<T> queryById(@SQLParam("id") Integer id);
+```
+
+* 4.0 支持jpa查询
+  > 具体使用模拟jpa的使用即可
+
+    * 当使用jpa的方式的时候.要注意一下内容
+        * 方法上存在注解 SqlJpa 时,将使用注解配置的要查询的字段和表,此配置优先级最高.
+        * 方法上不存在注解 SqlJpa 时,将会读取接口内的常量字段 TABLE_NAME 和 SELECT_COLUMN
+        * 必须通过 注解(SqlJpa) 或 常量字段(TABLE_NAME) 配置要查询的表
+        * 要查询的字段如果不配置,将使用 '*' 替代
+    * 已经支持jpa大部分关键字,部分关键字未支持,如下
+        * IS_EMPTY NOT_CONTAINING CONTAINING NEAR WITHIN REGEX EXISTS
+
+```java
+
+@DAO(catalog = UserServerConstant.SERVER_NAME)
+public interface TbUserDao extends BaseDao<TbUser> {
+
+    final static String TABLE_NAME = "tb_user";
+    final static String SELECT_COLUMN = "`id`,`name`,`nick_name`,`status`,`create_time`,`update_time`";
+
+    TbUser findByIdAndName(String id, String name);
+
+    @SqlJpa(columns = "id,name", tableName = "tb_user")
+    TbUser findByIdAndNameAndStatus(String id, String name, int status);
+}
 ```

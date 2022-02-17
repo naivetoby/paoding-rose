@@ -36,14 +36,17 @@ public class StatementRuntimeImpl implements StatementRuntime {
 
     private Map<String, Object> properties;
 
+    private boolean analysisWithJap;
+
     public StatementRuntimeImpl(StatementMetaData metaData, Map<String, Object> parameters) {
-        this.metaData = metaData;
+        this.metaData   = metaData;
         this.parameters = parameters;
-        this.sql = metaData.getSQL();
+        this.sql        = metaData.getSQL();
         SQLCondition[] sqlConditions = metaData.getSqlConditions();
         if (sqlConditions != null && sqlConditions.length > 0) {
             this.sqlCondition = sqlConditions.clone();
         }
+        this.analysisWithJap = metaData.isAnalysisWithJap();
     }
 
     @Override
@@ -101,13 +104,22 @@ public class StatementRuntimeImpl implements StatementRuntime {
     }
 
     @Override
-    public void setSQLAnds(SQLCondition[] sqlAnds) {
+    public void setSQLCondition(SQLCondition[] sqlAnds) {
         this.sqlCondition = sqlAnds;
     }
 
     @Override
-    public SQLCondition[] getSQLAnds() {
+    public SQLCondition[] getSQLCondition() {
         return this.sqlCondition;
     }
 
+    @Override
+    public boolean isAnalysisWithJap() {
+        return analysisWithJap;
+    }
+
+    @Override
+    public void setAnalysisWithJap(boolean analysisWithJap) {
+        this.analysisWithJap = analysisWithJap;
+    }
 }

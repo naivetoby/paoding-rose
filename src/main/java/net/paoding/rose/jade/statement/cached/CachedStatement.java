@@ -31,9 +31,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 /**
  * {@link CachedStatement} 封装了支持Cache的逻辑
- * 
  * @author qieqie.wang
- * 
  */
 public class CachedStatement implements Statement {
 
@@ -52,7 +50,7 @@ public class CachedStatement implements Statement {
     /**
      * 注解在该语句上的 {@link CacheDelete}，如果没有则为null
      * <p>
-     * 
+     * <p>
      * 可使用在各种语句上，甚至事查询语句上(很悲剧的：我也不知道为何有这种用法，执行一次查询还会附带删除神马Cache的啊？真的有吗？)
      */
     private final CacheDelete cacheDeleteAnnotation;
@@ -63,7 +61,6 @@ public class CachedStatement implements Statement {
     private final CacheProvider cacheProvider;
 
     /**
-     * 
      * @param cacheProvider
      * @param realStatement
      */
@@ -92,17 +89,17 @@ public class CachedStatement implements Statement {
     }
 
     @Override
-    public Object execute(Map<String, Object> parameters) {
+    public Object execute(Map<String, Object> parameters, Object[] args) {
         Object value = null;
         if (cacheAnnotation == null) {
-            value = realStatement.execute(parameters);
+            value = realStatement.execute(parameters, args);
         } else {
             CacheInterface cache = cacheProvider.getCacheByPool(//
                     getMetaData(), cacheAnnotation.pool());
             String cacheKey = buildKey(cacheAnnotation.key(), parameters);
             value = cache.get(cacheKey);
             if (value == null) {
-                value = realStatement.execute(parameters);
+                value = realStatement.execute(parameters, args);
                 cache.set(cacheKey, value, cacheAnnotation.expiry());
             }
         }
@@ -122,10 +119,8 @@ public class CachedStatement implements Statement {
 
     /**
      * 查找模板 KEY 中所有的 :name, :name.property 参数替换成实际值。
-     * 
-     * @param key - 作为模板的 KEY
+     * @param key        - 作为模板的 KEY
      * @param parameters - 传入的参数
-     * 
      * @return 最终的缓存 KEY
      * @author 廖涵 in355hz@gmail.com
      */

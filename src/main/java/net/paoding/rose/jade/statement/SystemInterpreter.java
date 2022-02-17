@@ -44,8 +44,8 @@ public class SystemInterpreter implements Interpreter {
             pattern.execute(context, parameters, constants);
             runtime.setArgs(context.getParams());
             StringBuilder sql = new StringBuilder(context.flushOut());
-            // 转换 and 表达式
-            SQLCondition[] sqlConditions = runtime.getSQLAnds();
+            // 转换 and or like 等 表达式
+            SQLCondition[] sqlConditions = runtime.getSQLCondition();
             if (sqlConditions != null && sqlConditions.length > 0) {
                 String value, condition;
                 String[] values;
