@@ -1,10 +1,14 @@
 package net.paoding.rose.jade.jpa;
 
+import net.paoding.rose.jade.constant.JadeConstant;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author fusheng.zhang
@@ -28,7 +32,7 @@ public class JpaUtil {
      * @return
      */
     public String methodToSql(String fileds, String tableName) {
-        String base = "", pre = "";
+        String base = "", pre = "", sql = String.format(JadeConstant.SQL_SELECT_FROM_FORMAT, fileds.trim(), tableName.trim());
         StringBuilder current = new StringBuilder();
         PartTree tree = new PartTree(methodName, clazz);
         for (PartTree.OrPart orPart : tree) {
@@ -45,7 +49,17 @@ public class JpaUtil {
             pre = current.toString();
         }
         base = Objects.equals(base, "") ? pre : this.or(base.equals(pre) ? pre : base, pre);
-        return String.format("select %s from %s where %s", fileds.trim(), tableName.trim(), base.trim());
+        if (StringUtils.isNotBlank(base)) {
+            sql = String.format(JadeConstant.SQL_WHERE_FORMAT, sql, base.trim());
+        }
+        Sort sort = tree.getSort();
+        if (!sort.equals(Sort.unsorted())) {
+            String orderBy = sort.stream()
+                    .map(o -> String.format("%s %s", o.getProperty(), o.getDirection()))
+                    .collect(Collectors.joining(", "));
+            sql = String.format(JadeConstant.SQL_ORDER_BY_FORMAT, sql, orderBy);
+        }
+        return sql;
     }
 
 
