@@ -49,7 +49,11 @@ public interface StatementRuntime {
 
     <T> T getProperty(String name);
 
-    void setSQLAnds(SQLCondition[] sqlAnds);
+    void setSQLCondition(SQLCondition[] sqlAnds);
 
-    SQLCondition[] getSQLAnds();
+    SQLCondition[] getSQLCondition();
+
+    boolean isAnalysisWithJap();
+
+    void setAnalysisWithJap(boolean analysisWithJap);
 }

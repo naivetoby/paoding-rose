@@ -15,12 +15,23 @@
  */
 package net.paoding.rose.jade.statement;
 
+import net.paoding.rose.jade.annotation.SQL;
+import net.paoding.rose.jade.annotation.SQLParam;
+import net.paoding.rose.jade.annotation.SQLType;
+import net.paoding.rose.jade.annotation.ShardBy;
+import net.paoding.rose.jade.annotation.SqlJpa;
+import net.paoding.rose.jade.annotation.condition.SQLCondition;
+import net.paoding.rose.jade.constant.JadeConstant;
+import net.paoding.rose.jade.excetion.JadeException;
+import net.paoding.rose.jade.jpa.JpaUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.regex.Pattern;
-
-import net.paoding.rose.jade.annotation.*;
-import net.paoding.rose.jade.annotation.condition.SQLCondition;
 
 /**
  * {@link StatementMetaData} 封装、缓存了一个DAO方法的相关信息
@@ -29,6 +40,8 @@ import net.paoding.rose.jade.annotation.condition.SQLCondition;
  */
 @SuppressWarnings({"rawtypes"})
 public class StatementMetaData {
+
+    private static final Log sqlLogger = LogFactory.getLog(StatementMetaData.class);
 
     /**
      * 所属的DAO类的classMetaData
@@ -98,49 +111,43 @@ public class StatementMetaData {
 
     private final int parameterCount;
 
+    private boolean analysisWithJap = false;
+
     // --------------------------------------------
 
     public StatementMetaData(DAOMetaData daoMetaData, Method method) {
-        this.daoMetaData = daoMetaData;
-        this.method = method;
-        SQL sqlAnnotation = method.getAnnotation(SQL.class);
-        if (sqlAnnotation == null) {
-            sqlAnnotation = new SQL() {
-
-                @Override
-                public Class<? extends Annotation> annotationType() {
-                    return SQL.class;
-                }
-
-                @Override
-                public String value() {
-                    String toString = StatementMetaData.this.method.toString();
-                    int paramStart = toString.indexOf("(");
-                    int methodNameStart = toString.lastIndexOf('.', paramStart) + 1;
-                    return toString.substring(methodNameStart) + "@" + StatementMetaData.this.method.getDeclaringClass().getName();
-                }
-
-                @Override
-                public SQLType type() {
-                    return SQLType.AUTO_DETECT;
-                }
-
-                @Override
-                public SQLCondition[] condition() {
-                    return new SQLCondition[0];
-                }
-            };
-        }
-        this.sql = sqlAnnotation.value();
-        this.sqlConditions = sqlAnnotation.condition();
-        this.sqlType = resolveSQLType(sqlAnnotation);
-
-        this.returnType = GenericUtils.getReturnType(this);
+        this.daoMetaData        = daoMetaData;
+        this.method             = method;
+        this.returnType         = GenericUtils.getReturnType(this);
         this.genericReturnTypes = GenericUtils.getActualClass(method.getGenericReturnType(), daoMetaData);
-
+        SQL sqlAnnotation = method.getAnnotation(SQL.class);
+        if (Objects.nonNull(sqlAnnotation)) {
+            this.sql           = sqlAnnotation.value();
+            this.sqlConditions = sqlAnnotation.condition();
+            this.sqlType       = resolveSQLType(sqlAnnotation);
+        } else {
+            this.analysisWithJap = true;
+            this.sqlConditions   = new SQLCondition[0];
+            SqlJpa sqlJpa = method.getAnnotation(SqlJpa.class);
+            boolean nonNull = Objects.nonNull(sqlJpa);
+            // 要查询的字段
+            String columnFileds = nonNull ? sqlJpa.columns() : daoMetaData.getConstant(JadeConstant.SELECT_COLUMN);
+            if (StringUtils.isBlank(columnFileds)) {
+                sqlLogger.warn(String.format("请在方法[%s]添加SqlJpa注解,或者在[%s]添加常量SELECT_COLUMN常量,指定要查询的字段",
+                        method.getName(), daoMetaData.getDAOClass()));
+            }
+            // 要查询的表
+            String tableName = nonNull ? sqlJpa.tableName() : daoMetaData.getConstant(JadeConstant.TABLE_NAME);
+            if (StringUtils.isBlank(tableName)) {
+                throw new JadeException("请在方法[{}]添加SqlJpa注解,或者在[{}]添加常量TABLE_NAME常量,指定要查询表",
+                        method.getName(), daoMetaData.getDAOClass());
+            }
+            this.sql     = new JpaUtil(method.getName(), returnType).methodToSql(columnFileds, tableName);
+            this.sqlType = resolveSQLType(this.sql, SQLType.AUTO_DETECT);
+        }
         Annotation[][] annotations = method.getParameterAnnotations();
         this.parameterCount = annotations.length;
-        this.sqlParams = new SQLParam[annotations.length];
+        this.sqlParams      = new SQLParam[annotations.length];
         int shardByIndex = -1;
         ShardBy shardBy = null;
         for (int index = 0; index < annotations.length; index++) {
@@ -150,14 +157,14 @@ public class StatementMetaData {
                         throw new IllegalArgumentException("duplicated @" + ShardBy.class.getName());
                     }
                     shardByIndex = index;
-                    shardBy = (ShardBy) annotation;
+                    shardBy      = (ShardBy) annotation;
                 } else if (annotation instanceof SQLParam) {
                     this.sqlParams[index] = (SQLParam) annotation;
                 }
             }
         }
         this.shardByIndex = shardByIndex;
-        this.shardBy = shardBy;
+        this.shardBy      = shardBy;
     }
 
     public DAOMetaData getDAOMetaData() {
@@ -223,6 +230,27 @@ public class StatementMetaData {
             }
         }
         return sqlType;
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private SQLType resolveSQLType(String sql, SQLType sqlType) {
+        if (sqlType == SQLType.AUTO_DETECT) {
+            for (Pattern selectPattern : SELECT_PATTERNS) {
+                // 用正则表达式匹配 SELECT 语句
+                if (selectPattern.matcher(sql).find() || selectPattern.matcher(getMethod().getName()).find()) {
+                    sqlType = SQLType.READ;
+                    break;
+                }
+            }
+            if (sqlType == SQLType.AUTO_DETECT) {
+                sqlType = SQLType.WRITE;
+            }
+        }
+        return sqlType;
+    }
+
+    public boolean isAnalysisWithJap() {
+        return analysisWithJap;
     }
 
     @Override

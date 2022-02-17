@@ -26,7 +26,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author 王志亮 [qieqie.wang@gmail.com]
@@ -64,8 +71,8 @@ public class JdbcStatement implements Statement {
             this.afterInvocationCallback = NULL_AFTER_INVOCATION_CALLBACK;
         }
         this.interpreters = (interpreters == null) ? new Interpreter[0] : interpreters;
-        this.querier = querier;
-        this.sqlType = sqlType;
+        this.querier      = querier;
+        this.sqlType      = sqlType;
         if (sqlType == SQLType.WRITE) {
             Method method = statementMetaData.getMethod();
             Class<?>[] types = method.getParameterTypes();
@@ -104,7 +111,7 @@ public class JdbcStatement implements Statement {
     }
 
     @Override
-    public Object execute(Map<String, Object> parameters) {
+    public Object execute(Map<String, Object> parameters, Object[] args) {
         Object result;
         if (batchUpdate) {
             //
@@ -134,8 +141,12 @@ public class JdbcStatement implements Statement {
             result = afterInvocationCallback.execute(runtimes.get(0), result);
         } else {
             StatementRuntime runtime = new StatementRuntimeImpl(metaData, parameters);
-            for (Interpreter interpreter : interpreters) {
-                interpreter.interpret(runtime);
+            if (runtime.isAnalysisWithJap()) {
+                runtime.setArgs(args);
+            } else {
+                for (Interpreter interpreter : interpreters) {
+                    interpreter.interpret(runtime);
+                }
             }
             log(parameters, runtime);
             result = querier.execute(sqlType, batchUpdate, runtime);

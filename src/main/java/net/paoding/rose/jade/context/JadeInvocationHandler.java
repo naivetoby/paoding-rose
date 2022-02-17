@@ -31,8 +31,10 @@ import org.springframework.jdbc.core.RowMapper;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -66,12 +68,12 @@ public class JadeInvocationHandler implements InvocationHandler {
             DataAccessFactory dataAccessFactory,
             CacheProvider cacheProvider,
             StatementWrapperProvider statementWrapperProvider) {
-        this.classLoader = classLoader;
-        this.daoMetaData = daoMetaData;
-        this.rowMapperFactory = rowMapperFactory;
-        this.dataAccessFactory = dataAccessFactory;
-        this.interpreterFactory = interpreterFactory;
-        this.cacheProvider = cacheProvider;
+        this.classLoader              = classLoader;
+        this.daoMetaData              = daoMetaData;
+        this.rowMapperFactory         = rowMapperFactory;
+        this.dataAccessFactory        = dataAccessFactory;
+        this.interpreterFactory       = interpreterFactory;
+        this.cacheProvider            = cacheProvider;
         this.statementWrapperProvider = statementWrapperProvider;
     }
 
@@ -97,9 +99,9 @@ public class JadeInvocationHandler implements InvocationHandler {
         Map<String, Object> parameters;
         StatementMetaData statemenetMetaData = statement.getMetaData();
         if (args == null || args.length == 0) {
-            parameters = new HashMap<>(4);
+            parameters = new LinkedHashMap<>(4);
         } else {
-            parameters = new HashMap<>(args.length * 2 + 4);
+            parameters = new LinkedHashMap<>(args.length * 2 + 4);
             for (int i = 0; i < args.length; i++) {
                 parameters.put(INDEX_NAMES[i], args[i]);
                 SQLParam sqlParam = statemenetMetaData.getSQLParamAt(i);
@@ -113,7 +115,7 @@ public class JadeInvocationHandler implements InvocationHandler {
             }
         }
 
-        return statement.execute(parameters);
+        return statement.execute(parameters, args);
     }
 
     private Statement getStatement(Method method) {
