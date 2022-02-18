@@ -22,17 +22,20 @@ import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -142,7 +145,12 @@ public class JdbcStatement implements Statement {
         } else {
             StatementRuntime runtime = new StatementRuntimeImpl(metaData, parameters);
             if (runtime.isAnalysisWithJap()) {
-                runtime.setArgs(args);
+                Optional<Pageable> pageable = Optional.empty();
+                if (Objects.nonNull(args)) {
+                    pageable = Arrays.stream(args).filter(o -> o instanceof Pageable).map(o -> (Pageable) o).findFirst();
+                }
+                runtime.setArgs(Arrays.stream(args).filter(o -> !(o instanceof Pageable)).toArray());
+                runtime.setSQL(metaData.getJpaDetail().sql(pageable));
             } else {
                 for (Interpreter interpreter : interpreters) {
                     interpreter.interpret(runtime);
