@@ -23,6 +23,7 @@ import net.paoding.rose.jade.annotation.SqlJpa;
 import net.paoding.rose.jade.annotation.condition.SQLCondition;
 import net.paoding.rose.jade.constant.JadeConstant;
 import net.paoding.rose.jade.excetion.JadeException;
+import net.paoding.rose.jade.jpa.JpaDetail;
 import net.paoding.rose.jade.jpa.JpaUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -111,7 +112,15 @@ public class StatementMetaData {
 
     private final int parameterCount;
 
+    /**
+     * 是否使用 jpa方式解析methodName
+     */
     private boolean analysisWithJap = false;
+
+    /**
+     * 使用jpa 解析 methodName 详情
+     */
+    private JpaDetail jpaDetail;
 
     // --------------------------------------------
 
@@ -133,6 +142,7 @@ public class StatementMetaData {
             // 要查询的字段
             String columnFileds = nonNull ? sqlJpa.columns() : daoMetaData.getConstant(JadeConstant.SELECT_COLUMN);
             if (StringUtils.isBlank(columnFileds)) {
+                columnFileds = "*";
                 sqlLogger.warn(String.format("请在方法[%s]添加SqlJpa注解,或者在[%s]添加常量SELECT_COLUMN常量,指定要查询的字段",
                         method.getName(), daoMetaData.getDAOClass()));
             }
@@ -142,8 +152,9 @@ public class StatementMetaData {
                 throw new JadeException("请在方法[{}]添加SqlJpa注解,或者在[{}]添加常量TABLE_NAME常量,指定要查询表",
                         method.getName(), daoMetaData.getDAOClass());
             }
-            this.sql     = new JpaUtil(method.getName(), returnType).methodToSql(columnFileds, tableName);
-            this.sqlType = resolveSQLType(this.sql, SQLType.AUTO_DETECT);
+            this.sql       = null;
+            this.jpaDetail = new JpaUtil(method.getName(), returnType).methodToSql(columnFileds, tableName);
+            this.sqlType   = SQLType.READ;
         }
         Annotation[][] annotations = method.getParameterAnnotations();
         this.parameterCount = annotations.length;
@@ -251,6 +262,10 @@ public class StatementMetaData {
 
     public boolean isAnalysisWithJap() {
         return analysisWithJap;
+    }
+
+    public JpaDetail getJpaDetail() {
+        return jpaDetail;
     }
 
     @Override

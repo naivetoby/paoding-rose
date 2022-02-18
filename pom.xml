@@ -6,7 +6,7 @@
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
     <packaging>jar</packaging>
-    <version>5.0.2</version>
+    <version>5.0.3</version>
     <name>paoding-rose-jade</name>
 
     <parent>
@@ -147,6 +147,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <!--跳过测试-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
             </plugin>
         </plugins>
     </build>

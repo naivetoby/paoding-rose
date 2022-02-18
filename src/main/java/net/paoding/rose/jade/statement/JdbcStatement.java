@@ -22,17 +22,20 @@ import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -114,35 +117,16 @@ public class JdbcStatement implements Statement {
     public Object execute(Map<String, Object> parameters, Object[] args) {
         Object result;
         if (batchUpdate) {
-            //
-            Iterable<?> iterable = (Iterable<?>) parameters.get(":1");
-            Iterator<?> iterator = iterable.iterator();
-            List<StatementRuntime> runtimes = new LinkedList<>();
-            int index = 0;
-            while (iterator.hasNext()) {
-                Object arg = iterator.next();
-                HashMap<String, Object> clone = new HashMap<String, Object>(parameters);
-                // 更新执行参数
-                clone.put(":1", arg);
-                if (metaData.getSQLParamAt(0) != null) {
-                    clone.put(metaData.getSQLParamAt(0).value(), arg);
-                }
-                StatementRuntime runtime = new StatementRuntimeImpl(metaData, clone);
-                for (Interpreter interpreter : interpreters) {
-                    interpreter.interpret(runtime);
-                }
-                if (index == 0) {
-                    log(parameters, runtime);
-                }
-                runtimes.add(runtime);
-                index++;
-            }
-            result = querier.execute(sqlType, batchUpdate, runtimes.toArray(new StatementRuntime[0]));
-            result = afterInvocationCallback.execute(runtimes.get(0), result);
+            result = batchUpdate(parameters);
         } else {
             StatementRuntime runtime = new StatementRuntimeImpl(metaData, parameters);
             if (runtime.isAnalysisWithJap()) {
-                runtime.setArgs(args);
+                Optional<Pageable> pageable = Optional.empty();
+                if (Objects.nonNull(args)) {
+                    pageable = Arrays.stream(args).filter(o -> o instanceof Pageable).map(o -> (Pageable) o).findFirst();
+                }
+                runtime.setArgs(Arrays.stream(args).filter(o -> !(o instanceof Pageable)).toArray());
+                runtime.setSQL(metaData.getJpaDetail().sql(pageable));
             } else {
                 for (Interpreter interpreter : interpreters) {
                     interpreter.interpret(runtime);
@@ -157,6 +141,40 @@ public class JdbcStatement implements Statement {
         }
         return result;
 
+    }
+
+    /**
+     * 批量操作
+     * @param parameters
+     * @return
+     */
+    private Object batchUpdate(Map<String, Object> parameters) {
+        Object result;
+        Iterable<?> iterable = (Iterable<?>) parameters.get(":1");
+        Iterator<?> iterator = iterable.iterator();
+        List<StatementRuntime> runtimes = new LinkedList<>();
+        int index = 0;
+        while (iterator.hasNext()) {
+            Object arg = iterator.next();
+            HashMap<String, Object> clone = new HashMap<String, Object>(parameters);
+            // 更新执行参数
+            clone.put(":1", arg);
+            if (metaData.getSQLParamAt(0) != null) {
+                clone.put(metaData.getSQLParamAt(0).value(), arg);
+            }
+            StatementRuntime runtime = new StatementRuntimeImpl(metaData, clone);
+            for (Interpreter interpreter : interpreters) {
+                interpreter.interpret(runtime);
+            }
+            if (index == 0) {
+                log(parameters, runtime);
+            }
+            runtimes.add(runtime);
+            index++;
+        }
+        result = querier.execute(sqlType, batchUpdate, runtimes.toArray(new StatementRuntime[0]));
+        result = afterInvocationCallback.execute(runtimes.get(0), result);
+        return result;
     }
 
     private void log(Map<String, Object> parameters, StatementRuntime runtime) {
