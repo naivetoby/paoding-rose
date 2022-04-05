@@ -125,18 +125,18 @@ public class StatementMetaData {
     // --------------------------------------------
 
     public StatementMetaData(DAOMetaData daoMetaData, Method method) {
-        this.daoMetaData        = daoMetaData;
-        this.method             = method;
-        this.returnType         = GenericUtils.getReturnType(this);
+        this.daoMetaData = daoMetaData;
+        this.method = method;
+        this.returnType = GenericUtils.getReturnType(this);
         this.genericReturnTypes = GenericUtils.getActualClass(method.getGenericReturnType(), daoMetaData);
         SQL sqlAnnotation = method.getAnnotation(SQL.class);
         if (Objects.nonNull(sqlAnnotation)) {
-            this.sql           = sqlAnnotation.value();
+            this.sql = sqlAnnotation.value();
             this.sqlConditions = sqlAnnotation.condition();
-            this.sqlType       = resolveSQLType(sqlAnnotation);
+            this.sqlType = resolveSQLType(sqlAnnotation);
         } else {
             this.analysisWithJap = true;
-            this.sqlConditions   = new SQLCondition[0];
+            this.sqlConditions = new SQLCondition[0];
             SqlJpa sqlJpa = method.getAnnotation(SqlJpa.class);
             boolean nonNull = Objects.nonNull(sqlJpa);
             // 要查询的字段
@@ -152,13 +152,13 @@ public class StatementMetaData {
                 throw new JadeException("请在方法[{}]添加SqlJpa注解,或者在[{}]添加常量TABLE_NAME常量,指定要查询表",
                         method.getName(), daoMetaData.getDAOClass());
             }
-            this.sql       = null;
-            this.jpaDetail = new JpaUtil(method.getName(), returnType).methodToSql(columnFileds, tableName);
-            this.sqlType   = SQLType.READ;
+            this.sql = null;
+            this.jpaDetail = new JpaUtil(method.getName(), returnType, genericReturnTypes).methodToSql(columnFileds, tableName);
+            this.sqlType = SQLType.READ;
         }
         Annotation[][] annotations = method.getParameterAnnotations();
         this.parameterCount = annotations.length;
-        this.sqlParams      = new SQLParam[annotations.length];
+        this.sqlParams = new SQLParam[annotations.length];
         int shardByIndex = -1;
         ShardBy shardBy = null;
         for (int index = 0; index < annotations.length; index++) {
@@ -168,14 +168,14 @@ public class StatementMetaData {
                         throw new IllegalArgumentException("duplicated @" + ShardBy.class.getName());
                     }
                     shardByIndex = index;
-                    shardBy      = (ShardBy) annotation;
+                    shardBy = (ShardBy) annotation;
                 } else if (annotation instanceof SQLParam) {
                     this.sqlParams[index] = (SQLParam) annotation;
                 }
             }
         }
         this.shardByIndex = shardByIndex;
-        this.shardBy      = shardBy;
+        this.shardBy = shardBy;
     }
 
     public DAOMetaData getDAOMetaData() {

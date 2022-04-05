@@ -19,9 +19,13 @@ public class JpaUtil {
 
     private final Class<?> clazz;
 
-    public JpaUtil(String methodName, Class<?> clazz) {
+    public JpaUtil(String methodName, Class<?> clazz, Class<?>[] genericReturnTypes) {
         this.methodName = methodName;
-        this.clazz      = clazz;
+        if (Objects.nonNull(genericReturnTypes) && genericReturnTypes.length == 1) {
+            this.clazz = genericReturnTypes[0];
+        } else {
+            this.clazz = clazz;
+        }
     }
 
     /**
@@ -36,7 +40,7 @@ public class JpaUtil {
         StringBuilder current = new StringBuilder();
         PartTree tree = new PartTree(methodName, clazz);
         for (PartTree.OrPart orPart : tree) {
-            pre  = current.toString();
+            pre = current.toString();
             base = Objects.equals(base, "") ? current.toString() : this.or(base.equals(pre) ? pre : base, pre);
 
             Iterator<Part> parts = orPart.iterator();

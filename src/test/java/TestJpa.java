@@ -25,7 +25,7 @@ public class TestJpa {
     @Test
     public void test() {
         Pageable pageable = PageRequest.of(0, 10, Sort.by(new Sort.Order(Sort.Direction.ASC, "nameLength")));
-        JpaDetail jpaDetail = new JpaUtil("findByIdAndNameLengthOrderByAgeDescIdAscStatus", User.class)
+        JpaDetail jpaDetail = new JpaUtil("findByIdAndNameLengthOrderByAgeDescIdAscStatus", User.class, null)
                 .methodToSql("id,age", "tb_user");
         System.out.println(jpaDetail.sql(Optional.of(pageable)));
     }
