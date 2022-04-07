@@ -43,5 +43,15 @@ public interface BatchDemo {
      */
     @SQL("update tb_user set user_name=:1.userName,password=:1.pwd where id=:1.id")
     int[] batchUpdate(List<TbUser> tbUsers);
+
+    /**
+     * 生成一条sql
+     * 假设ids = [1,2]
+     * select * from tb_user where id in (1,2)
+     * @param ids
+     * @return
+     */
+    @SQL("select * from tb_user where id in (:1)")
+    List<TbUser> findByIdIn(List<Integer> ids);
 }
 ```
