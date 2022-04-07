@@ -34,9 +34,8 @@
 
 ## 注:
 
-```
 1. 验证[数组]不为null且长度>0    :ls != null and :ls.length>0
-```
+2. 批量操作注意事项 详见 <a href="batchEdit.md">批量操作</a>
 
 ## jdk 需要 1.8以上版本
 
@@ -548,8 +547,9 @@ Optional<T> queryById(@SQLParam("id") Integer id);
 ```
 
 # 4.0 支持jpa查询
-  > 具体使用模拟jpa的使用即可
-  > >=5.0.3 支持 orderBy 和 分页
+
+> 具体使用模拟jpa的使用即可
+> > =5.0.3 支持 orderBy 和 分页
 
     * 当使用jpa的方式的时候.要注意一下内容
         * 方法上存在注解 SqlJpa 时,将使用注解配置的要查询的字段和表,此配置优先级最高.
