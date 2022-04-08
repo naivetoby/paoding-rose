@@ -19,15 +19,8 @@ import net.paoding.rose.jade.annotation.SQL;
 import net.paoding.rose.jade.annotation.SQLParam;
 import net.paoding.rose.jade.annotation.SQLType;
 import net.paoding.rose.jade.annotation.ShardBy;
-import net.paoding.rose.jade.annotation.SqlJpa;
 import net.paoding.rose.jade.annotation.condition.SQLCondition;
-import net.paoding.rose.jade.constant.JadeConstant;
-import net.paoding.rose.jade.excetion.JadeException;
-import net.paoding.rose.jade.jpa.JpaDetail;
 import net.paoding.rose.jade.jpa.JpaUtil;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -41,8 +34,6 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings({"rawtypes"})
 public class StatementMetaData {
-
-    private static final Log sqlLogger = LogFactory.getLog(StatementMetaData.class);
 
     /**
      * 所属的DAO类的classMetaData
@@ -120,7 +111,7 @@ public class StatementMetaData {
     /**
      * 使用jpa 解析 methodName 详情
      */
-    private JpaDetail jpaDetail;
+    private JpaUtil jpaUtil;
 
     // --------------------------------------------
 
@@ -137,23 +128,8 @@ public class StatementMetaData {
         } else {
             this.analysisWithJap = true;
             this.sqlConditions = new SQLCondition[0];
-            SqlJpa sqlJpa = method.getAnnotation(SqlJpa.class);
-            boolean nonNull = Objects.nonNull(sqlJpa);
-            // 要查询的字段
-            String columnFileds = nonNull ? sqlJpa.columns() : daoMetaData.getConstant(JadeConstant.SELECT_COLUMN);
-            if (StringUtils.isBlank(columnFileds)) {
-                columnFileds = "*";
-                sqlLogger.warn(String.format("请在方法[%s]添加SqlJpa注解,或者在[%s]添加常量SELECT_COLUMN常量,指定要查询的字段",
-                        method.getName(), daoMetaData.getDAOClass()));
-            }
-            // 要查询的表
-            String tableName = nonNull ? sqlJpa.tableName() : daoMetaData.getConstant(JadeConstant.TABLE_NAME);
-            if (StringUtils.isBlank(tableName)) {
-                throw new JadeException("请在方法[{}]添加SqlJpa注解,或者在[{}]添加常量TABLE_NAME常量,指定要查询表",
-                        method.getName(), daoMetaData.getDAOClass());
-            }
             this.sql = null;
-            this.jpaDetail = new JpaUtil(method.getName(), returnType, genericReturnTypes).methodToSql(columnFileds, tableName);
+            this.jpaUtil = new JpaUtil(daoMetaData, method, returnType, genericReturnTypes);
             this.sqlType = SQLType.READ;
         }
         Annotation[][] annotations = method.getParameterAnnotations();
@@ -264,8 +240,8 @@ public class StatementMetaData {
         return analysisWithJap;
     }
 
-    public JpaDetail getJpaDetail() {
-        return jpaDetail;
+    public JpaUtil getJpaUtil() {
+        return jpaUtil;
     }
 
     @Override

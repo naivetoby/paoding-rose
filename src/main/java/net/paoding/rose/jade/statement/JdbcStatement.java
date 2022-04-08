@@ -18,6 +18,7 @@ package net.paoding.rose.jade.statement;
 import net.paoding.rose.jade.annotation.AfterInvocation;
 import net.paoding.rose.jade.annotation.ReturnGeneratedKeys;
 import net.paoding.rose.jade.annotation.SQLType;
+import net.paoding.rose.jade.jpa.JpaDetail;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,8 +75,8 @@ public class JdbcStatement implements Statement {
             this.afterInvocationCallback = NULL_AFTER_INVOCATION_CALLBACK;
         }
         this.interpreters = (interpreters == null) ? new Interpreter[0] : interpreters;
-        this.querier      = querier;
-        this.sqlType      = sqlType;
+        this.querier = querier;
+        this.sqlType = sqlType;
         if (sqlType == SQLType.WRITE) {
             Method method = statementMetaData.getMethod();
             Class<?>[] types = method.getParameterTypes();
@@ -125,8 +126,9 @@ public class JdbcStatement implements Statement {
                 if (Objects.nonNull(args)) {
                     pageable = Arrays.stream(args).filter(o -> o instanceof Pageable).map(o -> (Pageable) o).findFirst();
                 }
-                runtime.setArgs(Arrays.stream(args).filter(o -> !(o instanceof Pageable)).toArray());
-                runtime.setSQL(metaData.getJpaDetail().sql(pageable));
+                JpaDetail jpaDetail = metaData.getJpaUtil().methodToSql(args);
+                runtime.setArgs(jpaDetail.getArgs().toArray(new Object[0]));
+                runtime.setSQL(jpaDetail.sql(pageable));
             } else {
                 for (Interpreter interpreter : interpreters) {
                     interpreter.interpret(runtime);
