@@ -21,8 +21,11 @@ public class JpaDetail {
 
     private final List<String> orderBy;
 
-    public JpaDetail(String sql, Sort sort) {
+    private final List<Object> args;
+
+    public JpaDetail(String sql, Sort sort, List<Object> args) {
         this.sql = sql;
+        this.args = args;
         if (!sort.equals(Sort.unsorted())) {
             this.orderBy = sort.stream()
                     .map(o -> String.format("%s %s", JadeUtil.getKey(o.getProperty()), o.getDirection()))
@@ -34,6 +37,10 @@ public class JpaDetail {
 
     public String getSql() {
         return sql;
+    }
+
+    public List<Object> getArgs() {
+        return args;
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
