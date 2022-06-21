@@ -21,7 +21,7 @@
 </dependency>
 ```
 
-## 多数据源
+## 利用Dao.catlog实现动态数据源
 
 ```java
 import org.springframework.context.annotation.Bean;
@@ -54,6 +54,7 @@ public class DatasourceConfig {
 ```
 
 ```java
+
 @DAO(catalog = "db1")
 public interface TbAddressDao {
     // 会查询db1 对应的open-server
@@ -63,6 +64,7 @@ public interface TbAddressDao {
 ```
 
 ```java
+
 @DAO(catalog = "db2")
 public interface TbUserDao {
     // 会查询db2 对应的 user-server
