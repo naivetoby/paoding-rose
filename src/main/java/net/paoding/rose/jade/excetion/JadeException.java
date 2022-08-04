@@ -1,5 +1,7 @@
 package net.paoding.rose.jade.excetion;
 
+import org.slf4j.helpers.MessageFormatter;
+
 /**
  * @author fusheng.zhang
  * @Description
@@ -10,12 +12,7 @@ public class JadeException extends RuntimeException {
     private String message;
 
     public JadeException(String message, Object... objects) {
-        if (message != null && objects.length > 0 && message.contains("{}")) {
-            for (Object obj : objects) {
-                message = message.replaceFirst("\\{}", obj == null ? "null" : String.valueOf(obj));
-            }
-        }
-        this.message = message;
+        this.message = MessageFormatter.arrayFormat(message, objects).getMessage();
     }
 
     public JadeException(String message) {
