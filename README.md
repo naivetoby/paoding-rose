@@ -2,6 +2,10 @@
 
 <a href="https://www.jetbrains.com/?from=paoding-rose-jade"><img src="idea.jpg"></a>
 
+# TODO
+
+* 支持分页查询,但是还未支持返回总条数的查询
+
 # 2021-09-06
 
 * 修改扫描方式,不在限制DAO结尾
@@ -562,6 +566,7 @@ Optional<T> queryById(@SQLParam("id") Integer id);
         * 要查询的字段如果不配置,将使用 '*' 替代
     * 已经支持jpa大部分关键字,部分关键字未支持,如下
         * IS_EMPTY NOT_CONTAINING CONTAINING NEAR WITHIN REGEX EXISTS
+    * 支持分页查询,但是还未支持返回总条数的查询
 
 ```java
 
