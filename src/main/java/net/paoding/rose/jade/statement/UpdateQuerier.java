@@ -24,12 +24,12 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author 王志亮 [qieqie.wang@gmail.com]
@@ -45,14 +45,12 @@ public class UpdateQuerier implements Querier {
 
     public UpdateQuerier(DataAccessFactory dataAccessProvider, StatementMetaData metaData) {
         this.dataAccessProvider = dataAccessProvider;
-        Method method = metaData.getMethod();
+        Class<?> returnType = metaData.getReturnType();
+        if (Objects.isNull(returnType)) returnType = metaData.getMethod().getReturnType();
         // 转换基本类型
-        Class<?> returnType = method.getReturnType();
-        if (returnType.isPrimitive()) {
-            returnType = ClassUtils.primitiveToWrapper(returnType);
-        }
+        if (returnType.isPrimitive()) returnType = ClassUtils.primitiveToWrapper(returnType);
         this.returnType = returnType;
-        returnGeneratedKeys = returnType != void.class && (method.isAnnotationPresent(ReturnGeneratedKeys.class));
+        returnGeneratedKeys = returnType != void.class && (metaData.getMethod().isAnnotationPresent(ReturnGeneratedKeys.class));
     }
 
     @Override
