@@ -159,49 +159,48 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         Map<String, Object> annotationAttributes =
                 importingClassMetadata.getAnnotationAttributes(EnablePaodingRoseJade.class.getName());
-        if (Objects.nonNull(annotationAttributes)) {
-            Set<String> scanPackages = new HashSet<>();
-            if (annotationAttributes.containsKey("basePackage")) {
-                String[] basePackage = (String[]) annotationAttributes.get("basePackage");
-                scanPackages.addAll(Arrays.asList(basePackage));
-            }
-            if (CollectionUtils.isEmpty(scanPackages)) {
-                scanPackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
-            }
-            ClassPathScanningCandidateComponentProvider scanner =
-                    new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
-                        @Override
-                        protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                            return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
-                        }
-                    };
-            scanner.setResourceLoader(this.resourceLoader);
-            scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
-            scanPackages.forEach(basePackage -> scanner.findCandidateComponents(basePackage).forEach(beanDefinition -> {
-                String daoClassName = Objects.requireNonNull(beanDefinition.getBeanClassName());
-                MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
-                /*
-                 * 属性及其设置要按 JadeFactoryBean 的要求来办
-                 */
-                propertyValues.addPropertyValue("objectType", daoClassName);
-                propertyValues.addPropertyValue("dataAccessFactory", getDataAccessFactory());
-                propertyValues.addPropertyValue("rowMapperFactory", getRowMapperFactory());
-                propertyValues.addPropertyValue("interpreterFactory", getInterpreterFactory());
-                String cacheProviderName = getCacheProviderName();
-                if (cacheProviderName != null) {
-                    RuntimeBeanReference beanRef = new RuntimeBeanReference(cacheProviderName);
-                    propertyValues.addPropertyValue("cacheProvider", beanRef);
-                }
-                String statementWrapperProvider = getStatementWrapperProvider();
-                if (statementWrapperProvider != null) {
-                    RuntimeBeanReference beanRef = new RuntimeBeanReference(statementWrapperProvider);
-                    propertyValues.addPropertyValue("statementWrapperProvider", beanRef);
-                }
-                ScannedGenericBeanDefinition scannedBeanDefinition = (ScannedGenericBeanDefinition) beanDefinition;
-                scannedBeanDefinition.setPropertyValues(propertyValues);
-                scannedBeanDefinition.setBeanClass(JadeFactoryBean.class);
-                registry.registerBeanDefinition(daoClassName, scannedBeanDefinition);
-            }));
+        if (Objects.isNull(annotationAttributes)) return;
+        Set<String> scanPackages = new HashSet<>();
+        if (annotationAttributes.containsKey("basePackage")) {
+            String[] basePackage = (String[]) annotationAttributes.get("basePackage");
+            scanPackages.addAll(Arrays.asList(basePackage));
         }
+        if (CollectionUtils.isEmpty(scanPackages)) {
+            scanPackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
+        }
+        ClassPathScanningCandidateComponentProvider scanner =
+                new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
+                    @Override
+                    protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+                        return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
+                    }
+                };
+        scanner.setResourceLoader(this.resourceLoader);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
+        scanPackages.forEach(basePackage -> scanner.findCandidateComponents(basePackage).forEach(beanDefinition -> {
+            String daoClassName = Objects.requireNonNull(beanDefinition.getBeanClassName());
+            MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
+            /*
+             * 属性及其设置要按 JadeFactoryBean 的要求来办
+             */
+            propertyValues.addPropertyValue("objectType", daoClassName);
+            propertyValues.addPropertyValue("dataAccessFactory", getDataAccessFactory());
+            propertyValues.addPropertyValue("rowMapperFactory", getRowMapperFactory());
+            propertyValues.addPropertyValue("interpreterFactory", getInterpreterFactory());
+            String cacheProviderName = getCacheProviderName();
+            if (cacheProviderName != null) {
+                RuntimeBeanReference beanRef = new RuntimeBeanReference(cacheProviderName);
+                propertyValues.addPropertyValue("cacheProvider", beanRef);
+            }
+            String statementWrapperProvider = getStatementWrapperProvider();
+            if (statementWrapperProvider != null) {
+                RuntimeBeanReference beanRef = new RuntimeBeanReference(statementWrapperProvider);
+                propertyValues.addPropertyValue("statementWrapperProvider", beanRef);
+            }
+            ScannedGenericBeanDefinition scannedBeanDefinition = (ScannedGenericBeanDefinition) beanDefinition;
+            scannedBeanDefinition.setPropertyValues(propertyValues);
+            scannedBeanDefinition.setBeanClass(JadeFactoryBean.class);
+            registry.registerBeanDefinition(daoClassName, scannedBeanDefinition);
+        }));
     }
 }
