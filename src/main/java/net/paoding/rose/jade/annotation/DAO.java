@@ -15,6 +15,8 @@
  */
 package net.paoding.rose.jade.annotation;
 
+import org.springframework.stereotype.Indexed;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -43,6 +45,7 @@ import java.sql.Connection;
  * @author 廖涵 [in355hz@gmail.com]
  * @see http://code.google.com/p/paoding-rose/wiki/Jade_DAO_Spec
  */
+@Indexed
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited

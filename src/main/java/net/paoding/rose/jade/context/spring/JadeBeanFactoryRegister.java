@@ -4,6 +4,7 @@ import net.paoding.rose.jade.annotation.DAO;
 import net.paoding.rose.jade.annotation.EnablePaodingRoseJade;
 import net.paoding.rose.jade.dataaccess.DataAccessFactory;
 import net.paoding.rose.jade.dataaccess.DataAccessFactoryAdapter;
+import net.paoding.rose.jade.excetion.JadeException;
 import net.paoding.rose.jade.rowmapper.DefaultRowMapperFactory;
 import net.paoding.rose.jade.rowmapper.RowMapperFactory;
 import net.paoding.rose.jade.statement.InterpreterFactory;
@@ -15,6 +16,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -23,18 +25,25 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.context.index.CandidateComponentsIndex;
+import org.springframework.context.index.CandidateComponentsIndexLoader;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author fusheng.zhang
@@ -168,16 +177,41 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
         if (CollectionUtils.isEmpty(scanPackages)) {
             scanPackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
         }
-        ClassPathScanningCandidateComponentProvider scanner =
-                new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
-                    @Override
-                    protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                        return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
-                    }
-                };
-        scanner.setResourceLoader(this.resourceLoader);
-        scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
-        scanPackages.forEach(basePackage -> scanner.findCandidateComponents(basePackage).forEach(beanDefinition -> {
+
+        Set<BeanDefinition> beanDefinitions;
+
+        CandidateComponentsIndex candidateComponentsIndex = CandidateComponentsIndexLoader.loadIndex(this.getClass().getClassLoader());
+        if (Objects.nonNull(candidateComponentsIndex)) {
+            String stereotype = DAO.class.getName();
+            Set<String> candidateTypes = scanPackages.stream()
+                    .map(scanPackage -> candidateComponentsIndex.getCandidateTypes(scanPackage, stereotype))
+                    .flatMap(Collection::stream).collect(Collectors.toSet());
+            CachingMetadataReaderFactory cachingMetadataReaderFactory = new CachingMetadataReaderFactory();
+            beanDefinitions = candidateTypes.stream().map(type -> {
+                try {
+                    MetadataReader metadataReader = cachingMetadataReaderFactory.getMetadataReader(type);
+                    ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+                    sbd.setSource(metadataReader.getResource());
+                    return sbd;
+                } catch (IOException e) {
+                    throw new JadeException(e.getMessage(), e);
+                }
+            }).collect(Collectors.toSet());
+        } else {
+            ClassPathScanningCandidateComponentProvider scanner =
+                    new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
+                        @Override
+                        protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+                            return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
+                        }
+                    };
+            scanner.setResourceLoader(this.resourceLoader);
+            scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
+            beanDefinitions = scanPackages.stream()
+                    .map(scanner::findCandidateComponents).flatMap(Collection::stream).collect(Collectors.toSet());
+        }
+
+        beanDefinitions.forEach(beanDefinition -> {
             String daoClassName = Objects.requireNonNull(beanDefinition.getBeanClassName());
             MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
             /*
@@ -201,6 +235,6 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
             scannedBeanDefinition.setPropertyValues(propertyValues);
             scannedBeanDefinition.setBeanClass(JadeFactoryBean.class);
             registry.registerBeanDefinition(daoClassName, scannedBeanDefinition);
-        }));
+        });
     }
 }
