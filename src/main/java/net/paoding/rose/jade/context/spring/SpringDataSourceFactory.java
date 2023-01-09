@@ -15,16 +15,10 @@
  */
 package net.paoding.rose.jade.context.spring;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.DataSource;
-
 import net.paoding.rose.jade.annotation.DAO;
 import net.paoding.rose.jade.dataaccess.DataSourceFactory;
 import net.paoding.rose.jade.dataaccess.DataSourceHolder;
 import net.paoding.rose.jade.statement.StatementMetaData;
-
 import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,8 +26,12 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import javax.sql.DataSource;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * 
  * @author qieqie.wang
  */
 public class SpringDataSourceFactory implements DataSourceFactory, ApplicationContextAware {
@@ -118,6 +116,7 @@ public class SpringDataSourceFactory implements DataSourceFactory, ApplicationCo
             }
             return new DataSourceHolder(dataSource);
         }
-        return null;
+        DataSource dataSource = applicationContext.getBean(DataSource.class);
+        return new DataSourceHolder(dataSource);
     }
 }
