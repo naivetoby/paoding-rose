@@ -40,7 +40,8 @@
 
 # 其他零散的文档
 
-* <a href='MultipleDataSources.md'>数据源相关的文档</a>
+* [MultipleDataSources.md](多数据源文档)
+* [Sharding-Jdbc.md](使用Sharding-Jdbc文档)
 
 # paoding-rose-jade DAO层使用手册
 
