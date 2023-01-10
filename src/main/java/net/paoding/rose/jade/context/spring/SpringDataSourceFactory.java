@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContextAware;
 
 import javax.sql.DataSource;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -83,7 +82,9 @@ public class SpringDataSourceFactory implements DataSourceFactory, ApplicationCo
             cachedDataSources.put(daoClass, holder);
             return holder;
         }
-        return null;
+        // 返回默认的数据源配置
+        DataSource dataSource = applicationContext.getBean(DataSource.class);
+        return new DataSourceHolder(dataSource);
     }
 
     private DataSourceHolder getDataSourceByDirectory(Class<?> daoClass, String catalog) {
@@ -116,7 +117,6 @@ public class SpringDataSourceFactory implements DataSourceFactory, ApplicationCo
             }
             return new DataSourceHolder(dataSource);
         }
-        DataSource dataSource = applicationContext.getBean(DataSource.class);
-        return new DataSourceHolder(dataSource);
+        return null;
     }
 }
