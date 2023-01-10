@@ -82,9 +82,7 @@ public class SpringDataSourceFactory implements DataSourceFactory, ApplicationCo
             cachedDataSources.put(daoClass, holder);
             return holder;
         }
-        // 返回默认的数据源配置
-        DataSource dataSource = applicationContext.getBean(DataSource.class);
-        return new DataSourceHolder(dataSource);
+        return null;
     }
 
     private DataSourceHolder getDataSourceByDirectory(Class<?> daoClass, String catalog) {
