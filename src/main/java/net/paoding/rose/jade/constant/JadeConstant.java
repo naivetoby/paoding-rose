@@ -13,6 +13,8 @@ public class JadeConstant {
     public final static String SQL_OR = "OR ";
 
     public final static String SQL_SELECT_FROM_FORMAT = "SELECT %s FROM %s";
+    public final static String SQL_COUNT_FROM_FORMAT = "SELECT COUNT(1) FROM %s";
+    public final static String SQL_DELETE_FROM_FORMAT = "DELETE FROM %s";
     public final static String SQL_WHERE_FORMAT = "%s WHERE %s";
     public final static String SQL_ORDER_BY_FORMAT = "%s ORDER BY %s";
     public final static String SQL_LIMIT_FORMAT = "%s LIMIT %s";

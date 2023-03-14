@@ -1,10 +1,6 @@
 package net.paoding.rose.jade.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * <pre>
@@ -32,5 +28,14 @@ public @interface SqlJpa {
      * 要查询的表名称
      * @return
      */
-    String tableName();
+    String tableName() default "";
+
+
+    /**
+     * 对应的 entity 的class<br/>
+     * 如果默认,则通过返回值解析<br/>
+     * count 或者 extra
+     * @return
+     */
+    Class<?> domainClass() default Void.class;
 }

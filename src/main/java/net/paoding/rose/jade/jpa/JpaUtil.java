@@ -13,12 +13,7 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author fusheng.zhang
@@ -26,6 +21,8 @@ import java.util.Objects;
  */
 public class JpaUtil {
     private static final Log sqlLogger = LogFactory.getLog(StatementMetaData.class);
+
+    private final SqlJpa sqlJpa;
 
     private final PartTree tree;
     /**
@@ -37,32 +34,33 @@ public class JpaUtil {
      */
     private final String tableName;
 
-    public JpaUtil(String fields, String tableName, String methodName, Class<?> returnType, Class<?>[] genericReturnTypes) {
+    public JpaUtil(String fields, String tableName, String methodName, Class<?> domainClass, SqlJpa sqlJpa) {
+        this.sqlJpa = sqlJpa;
         this.fields = fields;
         this.tableName = tableName;
-        if (Objects.nonNull(genericReturnTypes) && genericReturnTypes.length == 1) {
-            returnType = genericReturnTypes[0];
-        }
-        this.tree = new PartTree(methodName, returnType);
+        this.tree = new PartTree(methodName, domainClass);
     }
 
-    public JpaUtil(DAOMetaData daoMetaData, Method method, Class<?> returnType, Class<?>[] genericReturnTypes) {
-        if (Objects.nonNull(genericReturnTypes) && genericReturnTypes.length == 1) {
-            returnType = genericReturnTypes[0];
-        }
-        this.tree = new PartTree(method.getName(), returnType);
+    public JpaUtil(DAOMetaData daoMetaData, Method method, Class<?> domainClass) {
 
-        SqlJpa sqlJpa = method.getAnnotation(SqlJpa.class);
+        this.sqlJpa = method.getAnnotation(SqlJpa.class);
         boolean nonNull = Objects.nonNull(sqlJpa);
+        if (nonNull && !Objects.equals(sqlJpa.domainClass(), Void.class)) {
+            domainClass = sqlJpa.domainClass();
+        }
+
+        this.tree = new PartTree(method.getName(), domainClass);
         // 要查询的字段
-        String columnFields = nonNull ? sqlJpa.columns() : daoMetaData.getConstant(JadeConstant.SELECT_COLUMN);
+        String columnFields = nonNull && !StringUtils.equals(sqlJpa.columns(), "*")
+                ? sqlJpa.columns() : daoMetaData.getConstant(JadeConstant.SELECT_COLUMN);
         if (StringUtils.isBlank(columnFields)) {
             columnFields = "*";
             sqlLogger.warn(String.format("请在方法[%s]添加SqlJpa注解,或者在[%s]添加常量SELECT_COLUMN常量,指定要查询的字段",
                     method.getName(), daoMetaData.getDAOClass()));
         }
         // 要查询的表
-        String tableName = nonNull ? sqlJpa.tableName() : daoMetaData.getConstant(JadeConstant.TABLE_NAME);
+        String tableName = nonNull && StringUtils.isNotBlank(sqlJpa.tableName())
+                ? sqlJpa.tableName() : daoMetaData.getConstant(JadeConstant.TABLE_NAME);
         if (StringUtils.isBlank(tableName)) {
             throw new JadeException("请在方法[{}]添加SqlJpa注解,或者在[{}]添加常量TABLE_NAME常量,指定要查询表",
                     method.getName(), daoMetaData.getDAOClass());
@@ -76,8 +74,24 @@ public class JpaUtil {
      * @return
      */
     public JpaDetail methodToSql(Object[] args) {
-        String base = "", pre = "",
-                sql = String.format(JadeConstant.SQL_SELECT_FROM_FORMAT, fields.trim(), tableName.trim());
+        String sql = String.format(JadeConstant.SQL_SELECT_FROM_FORMAT, fields.trim(), tableName.trim());
+
+        if (this.tree.isCountProjection()) {
+            if (Objects.isNull(this.sqlJpa) || Objects.equals(this.sqlJpa.domainClass(), Void.class)) {
+                throw new JadeException("count 语句必须配置 SqlJpa.domain ");
+            }
+            sql = String.format(JadeConstant.SQL_COUNT_FROM_FORMAT, tableName.trim());
+        } else if (this.tree.isDelete()) {
+            if (Objects.isNull(this.sqlJpa) || Objects.equals(this.sqlJpa.domainClass(), Void.class)) {
+                throw new JadeException("delete 语句必须配置 SqlJpa.domain ");
+            }
+            sql = String.format(JadeConstant.SQL_DELETE_FROM_FORMAT, tableName.trim());
+        } else if (this.tree.isDistinct() || this.tree.isExistsProjection()) {
+            throw new JadeException("暂不支持 distinct 和 exists sql查询");
+        }
+
+
+        String base = "", pre = "";
         List<Object> args_ = new ArrayList<>(args.length);
         int nexArgSize;
         Iterator<Object> argsIterator = Arrays.stream(args).iterator();
@@ -137,32 +151,53 @@ public class JpaUtil {
         Part.Type type = part.getType();
         String key = part.getProperty().getSegment();
         switch (type) {
-            case BETWEEN: return JadeUtil.getKey(key) + " between ? and ? ";
-            case IS_NOT_NULL: return JadeUtil.getKey(key) + " is not null ";
-            case IS_NULL: return JadeUtil.getKey(key) + " is null ";
-            case LESS_THAN: case BEFORE: return JadeUtil.getKey(key) + " < ? ";
-            case LESS_THAN_EQUAL: return JadeUtil.getKey(key) + " <= ? ";
-            case GREATER_THAN: case AFTER: return JadeUtil.getKey(key) + " > ? ";
-            case GREATER_THAN_EQUAL: return JadeUtil.getKey(key) + " >= ? ";
-            case NOT_LIKE: return JadeUtil.getKey(key) + " not like ? ";
-            case LIKE: return JadeUtil.getKey(key) + " like ? ";
-            case STARTING_WITH: return JadeUtil.getKey(key) + " like ?% ";
-            case ENDING_WITH: return JadeUtil.getKey(key) + " like %? ";
-            case IS_NOT_EMPTY: return JadeUtil.getKey(key) + " is not  ? ";
+            case BETWEEN:
+                return JadeUtil.getKey(key) + " between ? and ? ";
+            case IS_NOT_NULL:
+                return JadeUtil.getKey(key) + " is not null ";
+            case IS_NULL:
+                return JadeUtil.getKey(key) + " is null ";
+            case LESS_THAN:
+            case BEFORE:
+                return JadeUtil.getKey(key) + " < ? ";
+            case LESS_THAN_EQUAL:
+                return JadeUtil.getKey(key) + " <= ? ";
+            case GREATER_THAN:
+            case AFTER:
+                return JadeUtil.getKey(key) + " > ? ";
+            case GREATER_THAN_EQUAL:
+                return JadeUtil.getKey(key) + " >= ? ";
+            case NOT_LIKE:
+                return JadeUtil.getKey(key) + " not like ? ";
+            case LIKE:
+                return JadeUtil.getKey(key) + " like ? ";
+            case STARTING_WITH:
+                return JadeUtil.getKey(key) + " like ?% ";
+            case ENDING_WITH:
+                return JadeUtil.getKey(key) + " like %? ";
+            case IS_NOT_EMPTY:
+                return JadeUtil.getKey(key) + " is not  ? ";
             // case IS_EMPTY: return JadeUtil.getKey(key) + " like ? ";
             // case NOT_CONTAINING: return JadeUtil.getKey(key) + " like ? ";
             // case CONTAINING: return JadeUtil.getKey(key) + " like ? ";
-            case NOT_IN: return JadeUtil.getKey(key) + " not in ( " + getQuestionMark(paramLength) + " ) ";
-            case IN: return JadeUtil.getKey(key) + " in ( " + getQuestionMark(paramLength) + " ) ";
+            case NOT_IN:
+                return JadeUtil.getKey(key) + " not in ( " + getQuestionMark(paramLength) + " ) ";
+            case IN:
+                return JadeUtil.getKey(key) + " in ( " + getQuestionMark(paramLength) + " ) ";
             // case NEAR: return JadeUtil.getKey(key) + " like ? ";
             // case WITHIN: return JadeUtil.getKey(key) + " like ? ";
             // case REGEX: return JadeUtil.getKey(key) + " like ? ";
             // case EXISTS: return JadeUtil.getKey(key) + " like ? ";
-            case TRUE: return JadeUtil.getKey(key) + " = true ";
-            case FALSE: return JadeUtil.getKey(key) + " = false ";
-            case NEGATING_SIMPLE_PROPERTY: return JadeUtil.getKey(key) + " <> ? ";
-            case SIMPLE_PROPERTY: return JadeUtil.getKey(key) + " = ? ";
-            default: throw new RuntimeException("Illegal criteria found '" + type + "'.");
+            case TRUE:
+                return JadeUtil.getKey(key) + " = true ";
+            case FALSE:
+                return JadeUtil.getKey(key) + " = false ";
+            case NEGATING_SIMPLE_PROPERTY:
+                return JadeUtil.getKey(key) + " <> ? ";
+            case SIMPLE_PROPERTY:
+                return JadeUtil.getKey(key) + " = ? ";
+            default:
+                throw new RuntimeException("Illegal criteria found '" + type + "'.");
         }
     }
 

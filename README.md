@@ -6,8 +6,15 @@
 
 * 支持分页查询,但是还未支持返回总条数的查询
 
+# 2023-03-14
+
+* 修改SqlJap 注解,支持配置对应的domain
+* 支持jpa的count delete sql 语句,需要配置domain
+
 # 2022-12-08
+
 > 优化 Dao 注解的扫描方式
+
 * 只要你的项目内引入 spring-context-indexer 依赖 即可开启这一优化
 
 # 2021-09-06
