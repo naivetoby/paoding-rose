@@ -126,7 +126,7 @@ public class StatementMetaData {
             this.analysisWithJap = true;
             this.sqlConditions = new SQLCondition[0];
             this.sql = null;
-            this.jpaUtil = new JpaUtil(daoMetaData, method, returnType);
+            this.jpaUtil = new JpaUtil(daoMetaData, method, returnType,genericReturnTypes);
             this.sqlType = SQLType.READ;
         }
         Annotation[][] annotations = method.getParameterAnnotations();

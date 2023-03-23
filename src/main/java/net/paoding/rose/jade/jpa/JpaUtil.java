@@ -13,7 +13,12 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author fusheng.zhang
@@ -41,12 +46,14 @@ public class JpaUtil {
         this.tree = new PartTree(methodName, domainClass);
     }
 
-    public JpaUtil(DAOMetaData daoMetaData, Method method, Class<?> domainClass) {
+    public JpaUtil(DAOMetaData daoMetaData, Method method, Class<?> domainClass, Class<?>[] genericReturnTypes) {
 
         this.sqlJpa = method.getAnnotation(SqlJpa.class);
         boolean nonNull = Objects.nonNull(sqlJpa);
         if (nonNull && !Objects.equals(sqlJpa.domainClass(), Void.class)) {
             domainClass = sqlJpa.domainClass();
+        } else if (Objects.nonNull(genericReturnTypes) && genericReturnTypes.length == 1) {
+            domainClass = genericReturnTypes[0];
         }
 
         this.tree = new PartTree(method.getName(), domainClass);
