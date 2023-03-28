@@ -125,7 +125,7 @@ public class JpaUtil {
         if (StringUtils.isNotBlank(base)) {
             sql = String.format(JadeConstant.SQL_WHERE_FORMAT, sql, base.trim());
         }
-        return new JpaDetail(sql, tree.getSort(), args_);
+        return new JpaDetail(sql, tree.getSort(), args_, tree.getMaxResults());
     }
 
     @SuppressWarnings("rawtypes")

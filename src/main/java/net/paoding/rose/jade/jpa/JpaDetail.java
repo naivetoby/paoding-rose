@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,9 +24,12 @@ public class JpaDetail {
 
     private final List<Object> args;
 
-    public JpaDetail(String sql, Sort sort, List<Object> args) {
+    private final Integer maxResults;
+
+    public JpaDetail(String sql, Sort sort, List<Object> args, Integer maxResults) {
         this.sql = sql;
         this.args = args;
+        this.maxResults = maxResults;
         if (!sort.equals(Sort.unsorted())) {
             this.orderBy = sort.stream()
                     .map(o -> String.format("%s %s", JadeUtil.getKey(o.getProperty()), o.getDirection()))
@@ -56,6 +60,8 @@ public class JpaDetail {
                         .collect(Collectors.toList());
             }
             limit = String.format("%s,%s", pageable.getOffset(), pageable.getPageSize());
+        } else if (Objects.nonNull(maxResults)) {
+            limit = String.format("%s", maxResults);
         }
         nextOrderBy.addAll(orderBy);
         String orderBy = StringUtils.join(nextOrderBy, ", ");

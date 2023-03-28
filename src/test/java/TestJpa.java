@@ -23,12 +23,13 @@ public class TestJpa {
 
     @Test
     public void test() {
-        String field = "id,age", tableName = "tb_user", methodName = "findByIdInAndIdAndNameLengthOrderByAgeDescIdAscStatus";
+        System.out.println(System.currentTimeMillis() / 1000L);
+        String field = "id,age", tableName = "tb_user", methodName = "findTop5ByIdInAndIdAndNameLengthOrderByAgeDescIdAscStatus";
         Class<?> returnType = User.class;
         Pageable pageable = PageRequest.of(0, 10, Sort.by(new Sort.Order(Sort.Direction.ASC, "nameLength")));
         JpaUtil jpaUtil = new JpaUtil(field, tableName, methodName, returnType, null);
         JpaDetail jpaDetail = jpaUtil.methodToSql(new Object[]{Arrays.asList(3, 4, 5), 1, 2});
-        System.out.println(jpaDetail.sql(Optional.of(pageable)));
+        System.out.println(jpaDetail.sql(Optional.empty()));
         System.out.println(jpaDetail.getArgs());
     }
 }
