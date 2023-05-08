@@ -63,6 +63,11 @@ public class DataAccessImpl implements DataAccess {
     }
 
     @Override
+    public void setFetchSize(int fetchSize) {
+        jdbcTemplate.setFetchSize(fetchSize);
+    }
+
+    @Override
     public int update(String sql, List<Object> args, KeyHolder generatedKeyHolder) {
         boolean returnKeys = generatedKeyHolder != null;
         PreparedStatementCreator psc = getPreparedStatementCreator(sql, args, returnKeys, false);

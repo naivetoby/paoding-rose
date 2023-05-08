@@ -17,7 +17,12 @@ package net.paoding.rose.jade.statement;
 
 import net.paoding.rose.jade.annotation.condition.SQLCondition;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author qieqie
@@ -38,15 +43,18 @@ public class StatementRuntimeImpl implements StatementRuntime {
 
     private boolean analysisWithJap;
 
+    private int fetchSize = -1;
+
     public StatementRuntimeImpl(StatementMetaData metaData, Map<String, Object> parameters) {
-        this.metaData   = metaData;
+        this.metaData = metaData;
         this.parameters = parameters;
-        this.sql        = metaData.getSQL();
+        this.sql = metaData.getSQL();
         SQLCondition[] sqlConditions = metaData.getSqlConditions();
         if (sqlConditions != null && sqlConditions.length > 0) {
             this.sqlCondition = sqlConditions.clone();
         }
         this.analysisWithJap = metaData.isAnalysisWithJap();
+        this.fetchSize = metaData.getFetchSize();
     }
 
     @Override
@@ -121,5 +129,10 @@ public class StatementRuntimeImpl implements StatementRuntime {
     @Override
     public void setAnalysisWithJap(boolean analysisWithJap) {
         this.analysisWithJap = analysisWithJap;
+    }
+
+    @Override
+    public int getFetchSize() {
+        return fetchSize;
     }
 }

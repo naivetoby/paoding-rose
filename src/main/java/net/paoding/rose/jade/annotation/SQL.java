@@ -83,4 +83,11 @@ public @interface SQL {
      * @return
      */
     SQLCondition[] condition() default {};
+
+    /**
+     * jdbc template fetch size<br/>
+     * {@link org.springframework.jdbc.core.JdbcTemplate#setFetchSize(int)}
+     * @return
+     */
+    int fetchSize() default -1;
 }

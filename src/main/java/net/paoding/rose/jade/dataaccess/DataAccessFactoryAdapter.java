@@ -16,12 +16,9 @@
 package net.paoding.rose.jade.dataaccess;
 
 import net.paoding.rose.jade.statement.StatementMetaData;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.autoconfigure.jdbc.JdbcProperties;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 框架内部使用的 {@link DataAccessFactory}实现，适配到 {@link DataSourceFactory}
@@ -32,12 +29,9 @@ import java.util.Objects;
 public class DataAccessFactoryAdapter implements DataAccessFactory {
 
     protected final DataSourceFactory dataSourceFactory;
-    private final ConfigurableListableBeanFactory beanFactory;
-    private JdbcProperties jdbcProperties;
 
-    public DataAccessFactoryAdapter(DataSourceFactory dataSourceFactory, ConfigurableListableBeanFactory beanFactory) {
+    public DataAccessFactoryAdapter(DataSourceFactory dataSourceFactory) {
         this.dataSourceFactory = dataSourceFactory;
-        this.beanFactory = beanFactory;
     }
 
     public DataSourceFactory getDataSourceFactory() {
@@ -54,15 +48,6 @@ public class DataAccessFactoryAdapter implements DataAccessFactory {
             throw new NullPointerException("cannot found a dataSource for: " + metaData);
         }
         JdbcTemplate jdbcTemplate = new JdbcTemplate(holder.getDataSource());
-        if (Objects.isNull(this.jdbcProperties)) {
-            this.jdbcProperties = beanFactory.getBean(JdbcProperties.class);
-        }
-        JdbcProperties.Template template = jdbcProperties.getTemplate();
-        if (template.getFetchSize() != -1) jdbcTemplate.setFetchSize(template.getFetchSize());
-        if (template.getMaxRows() != -1) jdbcTemplate.setMaxRows(template.getMaxRows());
-        if (Objects.nonNull(template.getQueryTimeout())) {
-            jdbcTemplate.setQueryTimeout((int) template.getQueryTimeout().getSeconds());
-        }
         return new DataAccessImpl(jdbcTemplate);
     }
 }

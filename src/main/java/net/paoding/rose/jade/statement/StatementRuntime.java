@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 
  * @author qieqie
- * 
  */
 public interface StatementRuntime {
 
@@ -56,4 +54,6 @@ public interface StatementRuntime {
     boolean isAnalysisWithJap();
 
     void setAnalysisWithJap(boolean analysisWithJap);
+
+    int getFetchSize();
 }

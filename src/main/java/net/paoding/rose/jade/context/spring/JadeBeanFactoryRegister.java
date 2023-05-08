@@ -105,7 +105,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
 
     public DataAccessFactory getDataAccessFactory() {
         if (this.dataAccessFactory == null) {
-            dataAccessFactory = new DataAccessFactoryAdapter(new SpringDataSourceFactoryDelegate(beanFactory), beanFactory);
+            dataAccessFactory = new DataAccessFactoryAdapter(new SpringDataSourceFactoryDelegate(beanFactory));
         }
         return dataAccessFactory;
     }
