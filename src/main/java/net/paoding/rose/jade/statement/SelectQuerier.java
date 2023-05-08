@@ -55,7 +55,7 @@ public class SelectQuerier implements Querier {
         this.dataAccessProvider = dataAccessProvider;
         this.returnType = metaData.getReturnType();
         this.rowMapper = rowMapper;
-        this.converter = makeResultConveter();
+        this.converter = makeResultConverter();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class SelectQuerier implements Querier {
     }
 
 
-    protected ResultConverter makeResultConveter() {
+    protected ResultConverter makeResultConverter() {
         ResultConverter converter;
         if (List.class == returnType || Collection.class == returnType || Iterable.class == returnType) {
             converter = (runtime, listResult) -> listResult;
