@@ -84,7 +84,7 @@ public class JdbcStatement implements Statement {
             if (returnType.isPrimitive()) {
                 returnType = ClassUtils.primitiveToWrapper(returnType);
             }
-            if (types.length > 0 && List.class.isAssignableFrom(types[0])) {
+            if (types.length == 1 && List.class.isAssignableFrom(types[0])) {
                 this.batchUpdate = true;
                 if (metaData.getMethod().getAnnotation(ReturnGeneratedKeys.class) != null) {
                     // 批量处理的直接不支持@ReturnGeneratedKeys注解

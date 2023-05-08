@@ -1,5 +1,6 @@
 package net.paoding.rose.jade.jpa;
 
+import net.paoding.rose.jade.annotation.SQLType;
 import net.paoding.rose.jade.annotation.SqlJpa;
 import net.paoding.rose.jade.constant.JadeConstant;
 import net.paoding.rose.jade.excetion.JadeException;
@@ -210,10 +211,12 @@ public class JpaUtil {
 
     private String getQuestionMark(int num) {
         String[] strings = new String[num];
-        for (int i = 0; i < num; i++) {
-            strings[i] = "?";
-        }
+        Arrays.fill(strings, "?");
         return String.join(" ,", strings);
+    }
+
+    public SQLType sqlType() {
+        return this.tree.isDelete() ? SQLType.WRITE : SQLType.READ;
     }
 
 }

@@ -15,7 +15,10 @@
  */
 package net.paoding.rose.jade.statement;
 
-import net.paoding.rose.jade.annotation.*;
+import net.paoding.rose.jade.annotation.SQL;
+import net.paoding.rose.jade.annotation.SQLParam;
+import net.paoding.rose.jade.annotation.SQLType;
+import net.paoding.rose.jade.annotation.ShardBy;
 import net.paoding.rose.jade.annotation.condition.SQLCondition;
 import net.paoding.rose.jade.jpa.JpaUtil;
 
@@ -126,8 +129,8 @@ public class StatementMetaData {
             this.analysisWithJap = true;
             this.sqlConditions = new SQLCondition[0];
             this.sql = null;
-            this.jpaUtil = new JpaUtil(daoMetaData, method, returnType,genericReturnTypes);
-            this.sqlType = SQLType.READ;
+            this.jpaUtil = new JpaUtil(daoMetaData, method, returnType, genericReturnTypes);
+            this.sqlType = this.jpaUtil.sqlType();
         }
         Annotation[][] annotations = method.getParameterAnnotations();
         this.parameterCount = annotations.length;
