@@ -15,13 +15,21 @@
  */
 package net.paoding.rose.jade.dataaccess;
 
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
+import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.core.SqlTypeValue;
+import org.springframework.jdbc.core.StatementCreatorUtils;
 import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * @author 王志亮 [qieqie.wang@gmail.com]
@@ -44,14 +52,20 @@ public class DataAccessImpl implements DataAccess {
 
     @Override
     public <T> List<T> select(String sql, List<Object> args, RowMapper<T> rowMapper) {
-        PreparedStatementCreator csc = getPreparedStatementCreator(sql, args, false);
+        PreparedStatementCreator csc = getPreparedStatementCreator(sql, args, false, false);
         return jdbcTemplate.query(csc, new RowMapperResultSetExtractor<T>(rowMapper));
+    }
+
+    @Override
+    public <T> Stream<T> selectForStream(String sql, List<Object> args, RowMapper<T> rowMapper) {
+        PreparedStatementCreator csc = getPreparedStatementCreator(sql, args, false, true);
+        return jdbcTemplate.queryForStream(csc, rowMapper);
     }
 
     @Override
     public int update(String sql, List<Object> args, KeyHolder generatedKeyHolder) {
         boolean returnKeys = generatedKeyHolder != null;
-        PreparedStatementCreator psc = getPreparedStatementCreator(sql, args, returnKeys);
+        PreparedStatementCreator psc = getPreparedStatementCreator(sql, args, returnKeys, false);
         if (generatedKeyHolder == null) {
             return jdbcTemplate.update(psc);
         } else {
@@ -64,11 +78,16 @@ public class DataAccessImpl implements DataAccess {
         return jdbcTemplate.batchUpdate(sql, batchArgs);
     }
 
-    private PreparedStatementCreator getPreparedStatementCreator(String sql, List<Object> args, boolean returnKeys) {
+    private PreparedStatementCreator getPreparedStatementCreator(String sql, List<Object> args, boolean returnKeys, boolean returnStream) {
         return con -> {
-            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps;
             if (returnKeys) {
                 ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            } else if (returnStream) {
+                ps = con.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                ps.setFetchDirection(ResultSet.FETCH_REVERSE);
+            } else {
+                ps = con.prepareStatement(sql);
             }
 
             if (args != null) {

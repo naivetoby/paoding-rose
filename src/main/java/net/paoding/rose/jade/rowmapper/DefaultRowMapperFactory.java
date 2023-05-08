@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * 支持DAO方法返回类型：
@@ -123,6 +124,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
                 boolean checkColumns = (rowHandler == null) || rowHandler.checkColumns();
                 boolean checkProperties = (rowHandler != null) && rowHandler.checkProperties();
                 boolean toOptional = rowType == Optional.class;
+                boolean toStream = rowType == Stream.class;
                 Class<?>[] genericReturnTypes = modifier.getGenericReturnTypes();
                 StringBuilder key = new StringBuilder(rowType.getName());
                 key.append("[checkColumns=").append(checkColumns).append("&checkProperties=").append(checkProperties);
@@ -134,6 +136,11 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
                     if (toOptional) {
                         if (genericReturnTypes == null || genericReturnTypes.length != 1) {
                             throw new JadeException("option generic paradigm [T] is null or length not equal to 1");
+                        }
+                        rowType = genericReturnTypes[0];
+                    } else if (toStream) {
+                        if (genericReturnTypes == null || genericReturnTypes.length != 1) {
+                            throw new JadeException("stream generic paradigm [T] is null or length not equal to 1");
                         }
                         rowType = genericReturnTypes[0];
                     }

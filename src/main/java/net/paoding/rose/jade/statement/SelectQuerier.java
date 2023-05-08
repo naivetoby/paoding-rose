@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * 实现 SELECT 查询。
@@ -66,23 +67,27 @@ public class SelectQuerier implements Querier {
     public Object execute(StatementRuntime runtime) {
         DataAccess dataAccess = dataAccessProvider.getDataAccess(runtime.getMetaData(), runtime.getProperties());
         // 执行查询
+        if (Stream.class == returnType) {
+            Stream<?> stream = dataAccess.selectForStream(runtime.getSQL(), runtime.getArgs(), rowMapper);
+            return converter.convert(runtime, stream);
+        }
         List<?> listResult = dataAccess.select(runtime.getSQL(), runtime.getArgs(), rowMapper);
         return converter.convert(runtime, listResult);
     }
 
 
     protected ResultConverter makeResultConverter() {
-        ResultConverter converter;
+
         if (List.class == returnType || Collection.class == returnType || Iterable.class == returnType) {
-            converter = (runtime, listResult) -> listResult;
+            return (runtime, listResult) -> listResult;
         } else if (ArrayList.class == returnType) {
-            converter = (runtime, listResult) -> new ArrayList(listResult);
+            return (DefaultResultConverter) (runtime, listResult) -> new ArrayList(listResult);
         } else if (LinkedList.class == returnType) {
-            converter = (runtime, listResult) -> new LinkedList(listResult);
+            return (DefaultResultConverter) (runtime, listResult) -> new LinkedList(listResult);
         } else if (Set.class == returnType || HashSet.class == returnType) {
-            converter = (runtime, listResult) -> new HashSet(listResult);
+            return (DefaultResultConverter) (runtime, listResult) -> new HashSet(listResult);
         } else if (Collection.class.isAssignableFrom(returnType)) {
-            converter = (runtime, listResult) -> {
+            return (DefaultResultConverter) (runtime, listResult) -> {
                 try {
                     Collection listToReturn = (Collection) returnType.newInstance();
                     listToReturn.addAll(listResult);
@@ -92,10 +97,10 @@ public class SelectQuerier implements Querier {
                 }
             };
         } else if (Iterator.class == returnType) {
-            converter = (runtime, listResult) -> listResult.iterator();
+            return (DefaultResultConverter) (runtime, listResult) -> listResult.iterator();
         } else if (returnType.isArray() && byte[].class != returnType) {
             if (returnType.getComponentType().isPrimitive()) {
-                converter = (runtime, listResult) -> {
+                return (DefaultResultConverter) (runtime, listResult) -> {
                     Object array = Array.newInstance(returnType.getComponentType(), listResult.size());
                     int len = listResult.size();
                     for (int i = 0; i < len; i++) {
@@ -104,25 +109,27 @@ public class SelectQuerier implements Querier {
                     return array;
                 };
             } else {
-                converter = (runtime, listResult) -> {
+                return (DefaultResultConverter) (runtime, listResult) -> {
                     Object array = Array.newInstance(returnType.getComponentType(), listResult.size());
                     return listResult.toArray((Object[]) array);
                 };
             }
         } else if (Map.class == returnType || HashMap.class == returnType) {
-            converter = (MapConverter) runtime -> new HashMap();
+            return (DefaultResultConverter) (MapConverter) runtime -> new HashMap();
         } else if (Hashtable.class == returnType) {
-            converter = (MapConverter) runtime -> new Hashtable();
+            return (DefaultResultConverter) (MapConverter) runtime -> new Hashtable();
         } else if (Map.class.isAssignableFrom(returnType)) {
-            converter = (MapConverter) runtime -> {
+            return (DefaultResultConverter) (MapConverter) runtime -> {
                 try {
                     return (Map) returnType.newInstance();
                 } catch (Exception e) {
                     throw new Error("error to create instance of " + returnType.getName());
                 }
             };
+        } else if (Stream.class == returnType) {
+            return (StreamResultConverter) (runtime, stream) -> stream;
         } else {
-            converter = (runtime, listResult) -> {
+            return (DefaultResultConverter) (runtime, listResult) -> {
                 final int sizeResult = listResult.size();
                 if (sizeResult == 1) {
                     // 返回单个  Bean、Boolean等类型对象
@@ -144,18 +151,25 @@ public class SelectQuerier implements Querier {
                 }
             };
         }
-        return converter;
     }
 
     /**
      * {@link ResultConverter} 负责将SELECT出来的List转化为DAO方法要求的返回结果
      * <p>
      */
-    interface ResultConverter {
-        Object convert(StatementRuntime runtime, List<?> listResult);
+    interface ResultConverter<T> {
+        Object convert(StatementRuntime runtime, T listResult);
     }
 
-    interface MapConverter extends ResultConverter {
+    interface DefaultResultConverter extends ResultConverter<List<?>> {
+
+    }
+
+    interface StreamResultConverter extends ResultConverter<Stream<?>> {
+
+    }
+
+    interface MapConverter extends DefaultResultConverter {
 
         @Override
         default Object convert(StatementRuntime runtime, List<?> listResult) {

@@ -124,8 +124,7 @@ public class BeanPropertyRowMapper implements RowMapper {
         if (checkProperties) {
             mappedProperties = new HashSet<String>();
         }
-        for (int i = 0; i < pds.length; i++) {
-            PropertyDescriptor pd = pds[i];
+        for (PropertyDescriptor pd : pds) {
             if (pd.getWriteMethod() != null) {
                 if (checkProperties) {
                     this.mappedProperties.add(pd.getName());
