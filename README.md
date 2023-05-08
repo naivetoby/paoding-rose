@@ -11,6 +11,7 @@
 * 支持stream查询
 
 ```
+@SQL(value="select * from tb_address",fetchSize=20)
 Stream<?> findAll();
 ```
 
