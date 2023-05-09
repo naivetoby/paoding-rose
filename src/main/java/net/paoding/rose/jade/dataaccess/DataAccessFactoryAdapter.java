@@ -15,7 +15,9 @@
  */
 package net.paoding.rose.jade.dataaccess;
 
+import net.paoding.rose.jade.properties.JadeProperties;
 import net.paoding.rose.jade.statement.StatementMetaData;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Map;
@@ -29,9 +31,11 @@ import java.util.Map;
 public class DataAccessFactoryAdapter implements DataAccessFactory {
 
     protected final DataSourceFactory dataSourceFactory;
+    private final ConfigurableListableBeanFactory beanFactory;
 
-    public DataAccessFactoryAdapter(DataSourceFactory dataSourceFactory) {
+    public DataAccessFactoryAdapter(DataSourceFactory dataSourceFactory, ConfigurableListableBeanFactory beanFactory) {
         this.dataSourceFactory = dataSourceFactory;
+        this.beanFactory = beanFactory;
     }
 
     public DataSourceFactory getDataSourceFactory() {
@@ -48,6 +52,7 @@ public class DataAccessFactoryAdapter implements DataAccessFactory {
             throw new NullPointerException("cannot found a dataSource for: " + metaData);
         }
         JdbcTemplate jdbcTemplate = new JdbcTemplate(holder.getDataSource());
-        return new DataAccessImpl(jdbcTemplate);
+        JadeProperties jadeProperties = beanFactory.getBean(JadeProperties.class);
+        return new DataAccessImpl(jdbcTemplate, jadeProperties);
     }
 }

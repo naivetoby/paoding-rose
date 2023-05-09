@@ -57,12 +57,6 @@ public interface DataAccess {
     <T> Stream<T> selectForStream(String sql, List<Object> args, RowMapper<T> rowMapper);
 
     /**
-     * set jdbc template fetch size
-     * @param fetchSize
-     */
-    void setFetchSize(int fetchSize);
-
-    /**
      * 写访问（更新或插入）
      * @param sql                所要执行的实际SQL语句
      * @param args               伴随该SQL语句的参数

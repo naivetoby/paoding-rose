@@ -43,8 +43,6 @@ public class StatementRuntimeImpl implements StatementRuntime {
 
     private boolean analysisWithJap;
 
-    private int fetchSize = -1;
-
     public StatementRuntimeImpl(StatementMetaData metaData, Map<String, Object> parameters) {
         this.metaData = metaData;
         this.parameters = parameters;
@@ -54,7 +52,6 @@ public class StatementRuntimeImpl implements StatementRuntime {
             this.sqlCondition = sqlConditions.clone();
         }
         this.analysisWithJap = metaData.isAnalysisWithJap();
-        this.fetchSize = metaData.getFetchSize();
     }
 
     @Override
@@ -129,10 +126,5 @@ public class StatementRuntimeImpl implements StatementRuntime {
     @Override
     public void setAnalysisWithJap(boolean analysisWithJap) {
         this.analysisWithJap = analysisWithJap;
-    }
-
-    @Override
-    public int getFetchSize() {
-        return fetchSize;
     }
 }

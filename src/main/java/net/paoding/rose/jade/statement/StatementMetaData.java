@@ -113,8 +113,6 @@ public class StatementMetaData {
      */
     private JpaUtil jpaUtil;
 
-    private int fetchSize = -1;
-
     // --------------------------------------------
 
     public StatementMetaData(DAOMetaData daoMetaData, Method method) {
@@ -127,7 +125,6 @@ public class StatementMetaData {
             this.sql = sqlAnnotation.value();
             this.sqlConditions = sqlAnnotation.condition();
             this.sqlType = resolveSQLType(sqlAnnotation);
-            this.fetchSize = sqlAnnotation.fetchSize();
         } else {
             this.analysisWithJap = true;
             this.sqlConditions = new SQLCondition[0];
@@ -276,8 +273,4 @@ public class StatementMetaData {
             Pattern.compile("^\\s*DESC.*", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^\\s*DESCRIBE.*", Pattern.CASE_INSENSITIVE),
     };
-
-    public int getFetchSize() {
-        return this.fetchSize;
-    }
 }

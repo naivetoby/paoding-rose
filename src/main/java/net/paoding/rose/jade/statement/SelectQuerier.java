@@ -68,7 +68,6 @@ public class SelectQuerier implements Querier {
         DataAccess dataAccess = dataAccessProvider.getDataAccess(runtime.getMetaData(), runtime.getProperties());
         // 执行查询
         if (Stream.class == returnType) {
-            dataAccess.setFetchSize(runtime.getFetchSize());
             Stream<?> stream = dataAccess.selectForStream(runtime.getSQL(), runtime.getArgs(), rowMapper);
             return converter.convert(runtime, stream);
         }

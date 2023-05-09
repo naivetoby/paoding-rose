@@ -15,6 +15,7 @@
  */
 package net.paoding.rose.jade.dataaccess;
 
+import net.paoding.rose.jade.properties.JadeProperties;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,9 +39,11 @@ import java.util.stream.Stream;
 public class DataAccessImpl implements DataAccess {
 
     private final JdbcTemplate jdbcTemplate;
+    private final JadeProperties jadeProperties;
 
-    DataAccessImpl(JdbcTemplate jdbcTemplate) {
+    DataAccessImpl(JdbcTemplate jdbcTemplate, JadeProperties jadeProperties) {
         this.jdbcTemplate = jdbcTemplate;
+        this.jadeProperties = jadeProperties;
     }
 
     // ------------------------------------------------
@@ -59,12 +62,10 @@ public class DataAccessImpl implements DataAccess {
     @Override
     public <T> Stream<T> selectForStream(String sql, List<Object> args, RowMapper<T> rowMapper) {
         PreparedStatementCreator csc = getPreparedStatementCreator(sql, args, false, true);
+        if (jadeProperties.getFetchSize() != -1) jdbcTemplate.setFetchSize(jadeProperties.getFetchSize());
+        if (jadeProperties.getMaxRows() != -1) jdbcTemplate.setMaxRows(jadeProperties.getMaxRows());
+        if (jadeProperties.getQueryTimeout() != -1) jdbcTemplate.setQueryTimeout(jadeProperties.getQueryTimeout());
         return jdbcTemplate.queryForStream(csc, rowMapper);
-    }
-
-    @Override
-    public void setFetchSize(int fetchSize) {
-        jdbcTemplate.setFetchSize(fetchSize);
     }
 
     @Override

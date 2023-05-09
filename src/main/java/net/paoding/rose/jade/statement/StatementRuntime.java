@@ -54,6 +54,4 @@ public interface StatementRuntime {
     boolean isAnalysisWithJap();
 
     void setAnalysisWithJap(boolean analysisWithJap);
-
-    int getFetchSize();
 }
