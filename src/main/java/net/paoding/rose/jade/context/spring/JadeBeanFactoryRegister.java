@@ -167,57 +167,78 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        Map<String, Object> annotationAttributes =
-                importingClassMetadata.getAnnotationAttributes(EnablePaodingRoseJade.class.getName());
-        if (Objects.isNull(annotationAttributes)) return;
-        Set<String> scanPackages = new HashSet<>();
-        if (annotationAttributes.containsKey("basePackage")) {
-            String[] basePackage = (String[]) annotationAttributes.get("basePackage");
-            scanPackages.addAll(Arrays.asList(basePackage));
-        }
-        if (CollectionUtils.isEmpty(scanPackages)) {
-            scanPackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
-        }
-
         Set<BeanDefinition> beanDefinitions;
-
+        // 通过 META-INF/rose.jade.%s.scanner 获取DAO注解标注的repository
         Set<String> candidateTypes = RoseJadeCandidateScan.doLoadIndex(resourceLoader);
-        if (CollectionUtils.isEmpty(candidateTypes)) {
+        if (!CollectionUtils.isEmpty(candidateTypes)) {
+            beanDefinitions = this.getBeanDefinitions4CandodateType(candidateTypes);
+        } else {
+            // 通过 spring-context-indexer 或者 ClassPathScanningCandidateComponentProvider 获取DAO注解标注的repository
+            // 获取要扫描的包
+            Map<String, Object> annotationAttributes =
+                    importingClassMetadata.getAnnotationAttributes(EnablePaodingRoseJade.class.getName());
+            Set<String> scanPackages = new HashSet<>();
+            if (Objects.nonNull(annotationAttributes) && annotationAttributes.containsKey("basePackage")) {
+                String[] basePackage = (String[]) annotationAttributes.get("basePackage");
+                scanPackages.addAll(Arrays.asList(basePackage));
+            }
+            if (CollectionUtils.isEmpty(scanPackages)) {
+                scanPackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
+            }
+            // 通过 spring-context-indexer 获取DAO注解标注的repository
             CandidateComponentsIndex candidateComponentsIndex = CandidateComponentsIndexLoader.loadIndex(this.getClass().getClassLoader());
             if (Objects.nonNull(candidateComponentsIndex)) {
                 String stereotype = DAO.class.getName();
                 candidateTypes = scanPackages.stream()
                         .map(scanPackage -> candidateComponentsIndex.getCandidateTypes(scanPackage, stereotype))
                         .flatMap(Collection::stream).collect(Collectors.toSet());
+                beanDefinitions = this.getBeanDefinitions4CandodateType(candidateTypes);
+            } else {
+                // 通过 ClassPathScanningCandidateComponentProvider 获取DAO注解标注的repository
+                ClassPathScanningCandidateComponentProvider scanner =
+                        new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
+                            @Override
+                            protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+                                return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
+                            }
+                        };
+                scanner.setResourceLoader(this.resourceLoader);
+                scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
+                beanDefinitions = scanPackages.stream()
+                        .map(scanner::findCandidateComponents).flatMap(Collection::stream).collect(Collectors.toSet());
             }
         }
+        // 注册
+        this.registerBeanDefinition(registry, beanDefinitions);
+    }
 
-        if (!CollectionUtils.isEmpty(candidateTypes)) {
-            CachingMetadataReaderFactory cachingMetadataReaderFactory = new CachingMetadataReaderFactory();
-            beanDefinitions = candidateTypes.stream().map(type -> {
-                try {
-                    MetadataReader metadataReader = cachingMetadataReaderFactory.getMetadataReader(type);
-                    ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
-                    sbd.setSource(metadataReader.getResource());
-                    return sbd;
-                } catch (IOException e) {
-                    throw new JadeException(e.getMessage(), e);
-                }
-            }).collect(Collectors.toSet());
-        } else {
-            ClassPathScanningCandidateComponentProvider scanner =
-                    new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
-                        @Override
-                        protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                            return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
-                        }
-                    };
-            scanner.setResourceLoader(this.resourceLoader);
-            scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
-            beanDefinitions = scanPackages.stream()
-                    .map(scanner::findCandidateComponents).flatMap(Collection::stream).collect(Collectors.toSet());
-        }
+    /**
+     * 通过 candidate type 生成 bean definition
+     * @param candidateTypes
+     * @return
+     */
+    private Set<BeanDefinition> getBeanDefinitions4CandodateType(Set<String> candidateTypes) {
+        Set<BeanDefinition> beanDefinitions;
+        CachingMetadataReaderFactory cachingMetadataReaderFactory = new CachingMetadataReaderFactory();
+        beanDefinitions = candidateTypes.stream().map(type -> {
+            try {
+                MetadataReader metadataReader = cachingMetadataReaderFactory.getMetadataReader(type);
+                ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+                sbd.setSource(metadataReader.getResource());
+                return sbd;
+            } catch (IOException e) {
+                throw new JadeException(e.getMessage(), e);
+            }
+        }).collect(Collectors.toSet());
+        return beanDefinitions;
+    }
 
+    /**
+     * registerBeanDefinition
+     * @param registry
+     * @param beanDefinitions
+     */
+    private void registerBeanDefinition(BeanDefinitionRegistry registry, Set<BeanDefinition> beanDefinitions) {
         beanDefinitions.forEach(beanDefinition -> {
             String daoClassName = Objects.requireNonNull(beanDefinition.getBeanClassName());
             MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();

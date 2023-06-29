@@ -28,6 +28,11 @@ public class RoseJadeCandidateScan {
 
     private static final Logger logger = LoggerFactory.getLogger(RoseJadeCandidateScan.class);
 
+    /**
+     * 扫描并获取 META-INF/rose.jade.%s.scanner 的文件内容
+     * @param resourceLoader
+     * @return
+     */
     public static Set<String> doLoadIndex(ResourceLoader resourceLoader) {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(resourceLoader);
