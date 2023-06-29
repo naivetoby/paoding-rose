@@ -7,6 +7,7 @@ import net.paoding.rose.jade.dataaccess.DataAccessFactoryAdapter;
 import net.paoding.rose.jade.excetion.JadeException;
 import net.paoding.rose.jade.rowmapper.DefaultRowMapperFactory;
 import net.paoding.rose.jade.rowmapper.RowMapperFactory;
+import net.paoding.rose.jade.scan.RoseJadeCandidateScan;
 import net.paoding.rose.jade.statement.InterpreterFactory;
 import net.paoding.rose.jade.statement.StatementWrapperProvider;
 import net.paoding.rose.jade.statement.cached.CacheProvider;
@@ -180,12 +181,18 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
 
         Set<BeanDefinition> beanDefinitions;
 
-        CandidateComponentsIndex candidateComponentsIndex = CandidateComponentsIndexLoader.loadIndex(this.getClass().getClassLoader());
-        if (Objects.nonNull(candidateComponentsIndex)) {
-            String stereotype = DAO.class.getName();
-            Set<String> candidateTypes = scanPackages.stream()
-                    .map(scanPackage -> candidateComponentsIndex.getCandidateTypes(scanPackage, stereotype))
-                    .flatMap(Collection::stream).collect(Collectors.toSet());
+        Set<String> candidateTypes = RoseJadeCandidateScan.doLoadIndex(resourceLoader);
+        if (CollectionUtils.isEmpty(candidateTypes)) {
+            CandidateComponentsIndex candidateComponentsIndex = CandidateComponentsIndexLoader.loadIndex(this.getClass().getClassLoader());
+            if (Objects.nonNull(candidateComponentsIndex)) {
+                String stereotype = DAO.class.getName();
+                candidateTypes = scanPackages.stream()
+                        .map(scanPackage -> candidateComponentsIndex.getCandidateTypes(scanPackage, stereotype))
+                        .flatMap(Collection::stream).collect(Collectors.toSet());
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(candidateTypes)) {
             CachingMetadataReaderFactory cachingMetadataReaderFactory = new CachingMetadataReaderFactory();
             beanDefinitions = candidateTypes.stream().map(type -> {
                 try {
