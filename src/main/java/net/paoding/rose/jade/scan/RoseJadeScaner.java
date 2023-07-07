@@ -66,9 +66,9 @@ public class RoseJadeScaner implements Processor {
         } catch (Exception e) {
             return false;
         }
-        Set<? extends Element> rootElements = roundEnv.getRootElements();
-        if (CollectionUtils.isEmpty(rootElements)) return false;
-        List<String> daoClass = rootElements.stream()
+        Set<? extends Element> elementsAnnotatedWithDao = roundEnv.getElementsAnnotatedWith(DAO.class);
+        if (CollectionUtils.isEmpty(elementsAnnotatedWithDao)) return false;
+        List<String> daoClass = elementsAnnotatedWithDao.stream()
                 .filter(element -> Objects.nonNull(element.getAnnotation(DAO.class)))
                 .map(Object::toString).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(daoClass)) return false;

@@ -4,7 +4,7 @@
 
     <groupId>cn.zhangfusheng</groupId>
     <artifactId>paoding-rose-jade</artifactId>
-    <version>5.2.1</version>
+    <version>5.2.2</version>
 
     <packaging>jar</packaging>
     <name>paoding-rose-jade</name>
@@ -94,7 +94,6 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
-                    <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
             </plugin>
             <!--跳过测试-->
@@ -105,6 +104,29 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
+            </plugin>
+            <!--  -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>create-rose-jade-scaner-processor</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.outputDirectory}/META-INF/services"/>
+                                <echo file="${project.build.outputDirectory}/META-INF/services/javax.annotation.processing.Processor">
+                                    net.paoding.rose.jade.scan.RoseJadeScaner
+                                </echo>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
