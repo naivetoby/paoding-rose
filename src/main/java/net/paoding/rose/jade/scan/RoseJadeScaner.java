@@ -7,6 +7,7 @@ import javax.annotation.processing.Completion;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * @author zhangfusheng
  * @date 2023/6/28
  */
+@SupportedAnnotationTypes("net.paoding.rose.jade.annotation.DAO")
 public class RoseJadeScaner implements Processor {
 
     static final String SCANNER_PATH = "META-INF/rose.jade.%s.scanner";
