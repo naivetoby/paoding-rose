@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @SupportedAnnotationTypes("net.paoding.rose.jade.annotation.DAO")
 public class RoseJadeScaner implements Processor {
 
-    static final String SCANNER_PATH = "META-INF/rose.jade.%s.scanner";
+    static final String SCANNER_PATH = "META-INF/rose.jade.scanner/%s";
     static AtomicInteger VERSION = new AtomicInteger(0);
 
     private ProcessingEnvironment processingEnv;
@@ -74,21 +74,17 @@ public class RoseJadeScaner implements Processor {
                 .filter(element -> Objects.nonNull(element.getAnnotation(DAO.class)))
                 .map(Object::toString).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(daoClass)) return false;
-        try {
-            FileObject fileObject = this.processingEnv.getFiler()
-                    .createResource(StandardLocation.CLASS_OUTPUT, "", String.format(SCANNER_PATH, VERSION.getAndIncrement()));
-            try (OutputStream outputStream = fileObject.openOutputStream()) {
-                daoClass.forEach(element -> {
-                    try {
-                        outputStream.write((element + System.lineSeparator()).getBytes(StandardCharsets.ISO_8859_1));
-                    } catch (IOException e) {
-                        this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
-                    }
-                });
+        daoClass.forEach(element -> {
+            try {
+                FileObject fileObject = this.processingEnv.getFiler()
+                        .createResource(StandardLocation.CLASS_OUTPUT, "", String.format(SCANNER_PATH, element));
+                try (OutputStream outputStream = fileObject.openOutputStream()) {
+                    outputStream.write((element + System.lineSeparator()).getBytes(StandardCharsets.ISO_8859_1));
+                }
+            } catch (IOException e) {
+                this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
             }
-        } catch (IOException e) {
-            this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
-        }
+        });
         return false;
     }
 
