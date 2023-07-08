@@ -94,6 +94,7 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                    <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
             </plugin>
             <!--跳过测试-->
@@ -104,29 +105,6 @@
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
-            </plugin>
-            <!--  -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>create-rose-jade-scaner-processor</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <mkdir dir="${project.build.outputDirectory}/META-INF/services"/>
-                                <echo file="${project.build.outputDirectory}/META-INF/services/javax.annotation.processing.Processor">
-                                    net.paoding.rose.jade.scan.RoseJadeScaner
-                                </echo>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
