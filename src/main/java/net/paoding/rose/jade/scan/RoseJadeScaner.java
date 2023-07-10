@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -36,7 +35,6 @@ import java.util.stream.Collectors;
 public class RoseJadeScaner implements Processor {
 
     static final String SCANNER_PATH = "META-INF/rose.jade.scanner/%s";
-    static AtomicInteger VERSION = new AtomicInteger(0);
 
     private ProcessingEnvironment processingEnv;
 
@@ -70,9 +68,7 @@ public class RoseJadeScaner implements Processor {
         }
         Set<? extends Element> elementsAnnotatedWithDao = roundEnv.getElementsAnnotatedWith(DAO.class);
         if (CollectionUtils.isEmpty(elementsAnnotatedWithDao)) return false;
-        List<String> daoClass = elementsAnnotatedWithDao.stream()
-                .filter(element -> Objects.nonNull(element.getAnnotation(DAO.class)))
-                .map(Object::toString).collect(Collectors.toList());
+        List<String> daoClass = elementsAnnotatedWithDao.stream().map(Object::toString).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(daoClass)) return false;
         daoClass.forEach(element -> {
             try {
