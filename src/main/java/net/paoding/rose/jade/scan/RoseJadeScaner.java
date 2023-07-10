@@ -2,8 +2,10 @@ package net.paoding.rose.jade.scan;
 
 import net.paoding.rose.jade.annotation.DAO;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.processing.Completion;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -14,16 +16,17 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 编译期 扫描DAO注解,生成rose.jade.%s.scanner<br/>
@@ -34,7 +37,8 @@ import java.util.stream.Collectors;
 @SupportedAnnotationTypes("net.paoding.rose.jade.annotation.DAO")
 public class RoseJadeScaner implements Processor {
 
-    static final String SCANNER_PATH = "META-INF/rose.jade.scanner/%s";
+    static final String SCANNER_PATH = "META-INF/rose.jade.scanner";
+    static final Set<String> DAO_CLASS_LIST = new HashSet<>();
 
     private ProcessingEnvironment processingEnv;
 
@@ -56,6 +60,16 @@ public class RoseJadeScaner implements Processor {
     @Override
     public void init(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
+        Filer filer = this.processingEnv.getFiler();
+        try (InputStream inputStream = filer.getResource(StandardLocation.CLASS_OUTPUT, "", SCANNER_PATH).openInputStream()) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String readLine = bufferedReader.readLine();
+            while (StringUtils.isNotBlank(readLine)) {
+                DAO_CLASS_LIST.add(readLine);
+                readLine = bufferedReader.readLine();
+            }
+        } catch (IOException ignored) {
+        }
     }
 
     @Override
@@ -68,19 +82,19 @@ public class RoseJadeScaner implements Processor {
         }
         Set<? extends Element> elementsAnnotatedWithDao = roundEnv.getElementsAnnotatedWith(DAO.class);
         if (CollectionUtils.isEmpty(elementsAnnotatedWithDao)) return false;
-        List<String> daoClass = elementsAnnotatedWithDao.stream().map(Object::toString).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(daoClass)) return false;
-        daoClass.forEach(element -> {
-            try {
-                FileObject fileObject = this.processingEnv.getFiler()
-                        .createResource(StandardLocation.CLASS_OUTPUT, "", String.format(SCANNER_PATH, element));
-                try (OutputStream outputStream = fileObject.openOutputStream()) {
+        elementsAnnotatedWithDao.stream().map(Object::toString).forEach(DAO_CLASS_LIST::add);
+        try (OutputStream outputStream = this.processingEnv.getFiler()
+                .createResource(StandardLocation.CLASS_OUTPUT, "", SCANNER_PATH).openOutputStream()) {
+            DAO_CLASS_LIST.forEach(element -> {
+                try {
                     outputStream.write((element + System.lineSeparator()).getBytes(StandardCharsets.ISO_8859_1));
+                } catch (IOException e) {
+                    this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
                 }
-            } catch (IOException e) {
-                this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
-            }
-        });
+            });
+        } catch (IOException e) {
+            this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+        }
         return false;
     }
 

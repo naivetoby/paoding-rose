@@ -1,16 +1,19 @@
 package net.paoding.rose.jade.scan;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author zhangfusheng
@@ -28,8 +31,18 @@ public class RoseJadeCandidateScan {
     public static Set<String> doLoadIndex(ResourceLoader resourceLoader) {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(resourceLoader);
-            Resource[] resources = resolver.getResources("classpath*:META-INF/rose.jade.scanner/**");
-            return Arrays.stream(resources).map(Resource::getFilename).collect(Collectors.toSet());
+            Resource[] resources = resolver.getResources("classpath*:META-INF/rose.jade.scanner");
+            if (resources.length == 0) return new HashSet<>(0);
+            Resource resource = resources[0];
+            InputStream inputStream = resource.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            HashSet<String> daoClass = new HashSet<>();
+            String line = bufferedReader.readLine();
+            while (StringUtils.isNotBlank(line)) {
+                daoClass.add(line);
+                line = bufferedReader.readLine();
+            }
+            return daoClass;
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
