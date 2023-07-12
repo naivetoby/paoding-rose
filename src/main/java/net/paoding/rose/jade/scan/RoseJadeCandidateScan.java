@@ -38,13 +38,18 @@ public class RoseJadeCandidateScan {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HashSet<String> daoClass = new HashSet<>();
             String line = bufferedReader.readLine();
+            ClassLoader classLoader = RoseJadeCandidateScan.class.getClassLoader();
             while (StringUtils.isNotBlank(line)) {
-                daoClass.add(line);
-                line = bufferedReader.readLine();
+                try {
+                    Class<?> aClass = classLoader.loadClass(line);
+                    if (Objects.nonNull(aClass)) daoClass.add(line);
+                } catch (ClassNotFoundException ignored) {
+                } finally {
+                    line = bufferedReader.readLine();
+                }
             }
             return daoClass;
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+        } catch (IOException ignored) {
         }
         return new HashSet<>(0);
     }
