@@ -32,20 +32,20 @@ public class RoseJadeCandidateScan {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(resourceLoader);
             Resource[] resources = resolver.getResources("classpath*:META-INF/rose.jade.scanner");
-            if (resources.length == 0) return new HashSet<>(0);
-            Resource resource = resources[0];
-            InputStream inputStream = resource.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HashSet<String> daoClass = new HashSet<>();
-            String line = bufferedReader.readLine();
-            ClassLoader classLoader = RoseJadeCandidateScan.class.getClassLoader();
-            while (StringUtils.isNotBlank(line)) {
-                try {
-                    Class<?> aClass = classLoader.loadClass(line);
-                    if (Objects.nonNull(aClass)) daoClass.add(line);
-                } catch (ClassNotFoundException ignored) {
-                } finally {
-                    line = bufferedReader.readLine();
+            for (Resource resource : resources) {
+                InputStream inputStream = resource.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String line = bufferedReader.readLine();
+                ClassLoader classLoader = RoseJadeCandidateScan.class.getClassLoader();
+                while (StringUtils.isNotBlank(line)) {
+                    try {
+                        Class<?> aClass = classLoader.loadClass(line);
+                        if (Objects.nonNull(aClass)) daoClass.add(line);
+                    } catch (ClassNotFoundException ignored) {
+                    } finally {
+                        line = bufferedReader.readLine();
+                    }
                 }
             }
             return daoClass;
