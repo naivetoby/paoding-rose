@@ -19,7 +19,7 @@ import net.paoding.rose.jade.annotation.ReturnGeneratedKeys;
 import net.paoding.rose.jade.annotation.SQLType;
 import net.paoding.rose.jade.dataaccess.DataAccess;
 import net.paoding.rose.jade.dataaccess.DataAccessFactory;
-import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;

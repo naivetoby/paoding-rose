@@ -7,7 +7,7 @@ import net.paoding.rose.jade.excetion.JadeException;
 import net.paoding.rose.jade.statement.DAOMetaData;
 import net.paoding.rose.jade.statement.StatementMetaData;
 import net.paoding.rose.jade.util.JadeUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.data.repository.query.parser.Part;

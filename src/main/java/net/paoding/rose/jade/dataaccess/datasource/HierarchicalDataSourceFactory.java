@@ -24,17 +24,17 @@ import net.paoding.rose.jade.dataaccess.DataSourceFactory;
 import net.paoding.rose.jade.dataaccess.DataSourceHolder;
 import net.paoding.rose.jade.statement.StatementMetaData;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * package层级式的数据源工厂。
  * <p>
- * 
+ *
  * 本工厂实现可以注册多个不同的数据源，使用者需要为每个数据源设定一个以点号分隔的名字，形同一个package名称或class全名称。
  * 当框架要求本工厂为某个DAO方法提供数据源时，本工厂会从class全名开始逐级寻找是否有相应数据源被注册，如果有则返回。
- * 
+ *
  * @author qieqie.wang@gmail.com
- * 
+ *
  */
 public class HierarchicalDataSourceFactory implements DataSourceFactory {
 
@@ -57,7 +57,7 @@ public class HierarchicalDataSourceFactory implements DataSourceFactory {
 
     /**
      * 注册一个数据源，名称以点号为分隔分成多级。如果名称星号，表示默认数据源。
-     * 
+     *
      * @param name
      * @param dataSource
      */
@@ -77,7 +77,7 @@ public class HierarchicalDataSourceFactory implements DataSourceFactory {
 
     /**
      * 注册一个数据源工厂，名称以点号为分隔分成多级。如果名称星号，表示默认数据源工厂。
-     * 
+     *
      * @param name
      * @param dataSource
      */

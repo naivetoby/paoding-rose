@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -59,7 +59,7 @@ public class SimpleInterpreter implements Interpreter {
 
             Object value = null;
 
-            // 解析  a.b.c 类型的名称 
+            // 解析  a.b.c 类型的名称
             int find = name.indexOf('.');
             if (find >= 0) {
 

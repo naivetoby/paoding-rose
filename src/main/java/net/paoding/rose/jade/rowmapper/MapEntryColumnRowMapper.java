@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import net.paoding.rose.jade.annotation.KeyColumnOfMap;
 import net.paoding.rose.jade.statement.StatementMetaData;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.TypeMismatchDataAccessException;
@@ -32,10 +32,10 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * 在将SQL结果集某一行的两列，一列作为key，一列作为value，形成一个key-value映射对。
- * 
+ *
  * @author 王志亮 [qieqie.wang@gmail.com]
  * @author 廖涵 [in355hz@gmail.com]
- * 
+ *
  */
 public class MapEntryColumnRowMapper implements RowMapper {
 

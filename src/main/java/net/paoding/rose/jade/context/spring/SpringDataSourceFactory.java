@@ -19,7 +19,6 @@ import net.paoding.rose.jade.annotation.DAO;
 import net.paoding.rose.jade.dataaccess.DataSourceFactory;
 import net.paoding.rose.jade.dataaccess.DataSourceHolder;
 import net.paoding.rose.jade.statement.StatementMetaData;
-import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -107,7 +106,7 @@ public class SpringDataSourceFactory implements DataSourceFactory, ApplicationCo
         if (applicationContext.containsBean(key)) {
             Object dataSource = applicationContext.getBean(key);
             if (!(dataSource instanceof DataSource) && !(dataSource instanceof DataSourceFactory)) {
-                throw new IllegalClassException("expects DataSource or DataSourceFactory, but a "
+                throw new IllegalArgumentException("expects DataSource or DataSourceFactory, but a "
                         + dataSource.getClass().getName());
             }
             if (logger.isDebugEnabled()) {

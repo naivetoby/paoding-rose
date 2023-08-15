@@ -18,12 +18,12 @@ package net.paoding.rose.jade.statement;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
- * 
+ *
  * @author qieqie
- * 
+ *
  */
 public class DefaultInterpreterFactory implements InterpreterFactory {
 

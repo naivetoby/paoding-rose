@@ -19,7 +19,7 @@ import net.paoding.rose.jade.annotation.AfterInvocation;
 import net.paoding.rose.jade.annotation.ReturnGeneratedKeys;
 import net.paoding.rose.jade.annotation.SQLType;
 import net.paoding.rose.jade.jpa.JpaDetail;
-import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.InvalidDataAccessApiUsageException;

@@ -11,7 +11,7 @@ import net.paoding.rose.jade.scan.RoseJadeCandidateScan;
 import net.paoding.rose.jade.statement.InterpreterFactory;
 import net.paoding.rose.jade.statement.StatementWrapperProvider;
 import net.paoding.rose.jade.statement.cached.CacheProvider;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanFactory;

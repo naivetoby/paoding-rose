@@ -19,7 +19,7 @@ import net.paoding.rose.jade.annotation.condition.SQLCondition;
 import net.paoding.rose.jade.statement.expression.ExqlPattern;
 import net.paoding.rose.jade.statement.expression.impl.ExqlContextImpl;
 import net.paoding.rose.jade.statement.expression.impl.ExqlPatternImpl;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.BadSqlGrammarException;
 
 import java.sql.SQLSyntaxErrorException;

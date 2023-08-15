@@ -4,7 +4,7 @@ import net.paoding.rose.jade.annotation.DAO;
 import net.paoding.rose.jade.dataaccess.DataSourceFactory;
 import net.paoding.rose.jade.dataaccess.DataSourceHolder;
 import net.paoding.rose.jade.statement.StatementMetaData;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 
 import java.util.HashMap;

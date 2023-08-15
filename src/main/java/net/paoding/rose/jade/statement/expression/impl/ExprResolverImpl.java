@@ -1,11 +1,11 @@
 package net.paoding.rose.jade.statement.expression.impl;
 
 import net.paoding.rose.jade.statement.expression.ExprResolver;
-import org.apache.commons.jexl.Expression;
-import org.apache.commons.jexl.ExpressionFactory;
-import org.apache.commons.jexl.JexlContext;
-import org.apache.commons.jexl.JexlHelper;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.jexl2.Expression;
+import org.apache.commons.jexl2.JexlContext;
+import org.apache.commons.jexl2.JexlEngine;
+import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  * 默认使用: Apache Common Jexl 引擎实现表达式处理。
+ *
  * @author han.liao
  */
 public class ExprResolverImpl implements ExprResolver {
@@ -42,20 +43,20 @@ public class ExprResolverImpl implements ExprResolver {
     protected final Map<String, Object> mapConsts = new HashMap<String, Object>();
 
     // Common Jexl 上下文
-    protected final JexlContext context = JexlHelper.createContext();
+    protected final JexlContext context = new MapContext();
 
     /**
      * 构造表达式处理器。
      */
     @SuppressWarnings("unchecked")
     public ExprResolverImpl() {
-        Map<Object, Object> map = context.getVars();
-        map.put(VAR_PREFIX, mapVars);
-        map.put(CONST_PREFIX, mapConsts);
+        context.set(VAR_PREFIX, mapVars);
+        context.set(CONST_PREFIX, mapConsts);
     }
 
     /**
      * 构造表达式处理器。
+     *
      * @param mapVars - 初始的参数表
      */
     public ExprResolverImpl(Map<String, ?> mapVars) {
@@ -65,6 +66,7 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 构造表达式处理器。
+     *
      * @param mapVars   - 初始的参数表
      * @param mapConsts - 初始的常量表
      */
@@ -77,17 +79,19 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 设置上下文
+     *
      * @param key   key
      * @param value value
      */
     @Override
     public void setContext(String key, Object value) {
         //noinspection unchecked
-        context.getVars().put(key, value);
+        context.set(key, value);
     }
 
     /**
      * 返回表达式处理器的参数表。
+     *
      * @return 处理器的参数表
      */
     public Map<String, ?> getVars() {
@@ -96,6 +100,7 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 设置表达式处理器的参数表。
+     *
      * @param map - 处理器的参数表
      */
     public void setVars(Map<String, ?> map) {
@@ -104,6 +109,7 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 返回表达式处理器的常量表。
+     *
      * @return 处理器的常量表
      */
     public Map<String, ?> getConstants() {
@@ -112,6 +118,7 @@ public class ExprResolverImpl implements ExprResolver {
 
     /**
      * 设置表达式处理器的常量表。
+     *
      * @param map - 处理器的常量表
      */
     public void setConstants(Map<String, ?> map) {
@@ -171,8 +178,7 @@ public class ExprResolverImpl implements ExprResolver {
                     }
 
                     if (!mapVars.containsKey(name)) {
-                        throw new IllegalArgumentException("Variable '" + name
-                                + "' not defined in DAO method");
+                        throw new IllegalArgumentException("Variable '" + name + "' not defined in DAO method");
                     }
 
                     // 按名称访问变量
@@ -184,8 +190,7 @@ public class ExprResolverImpl implements ExprResolver {
                 } else if ("$".equals(prefix)) {
 
                     if (!mapConsts.containsKey(name)) {
-                        throw new IllegalArgumentException("Constant '" + name
-                                + "' not defined in DAO class");
+                        throw new IllegalArgumentException("Constant '" + name + "' not defined in DAO class");
                     }
 
                     // 拼出常量访问语句
@@ -201,7 +206,8 @@ public class ExprResolverImpl implements ExprResolver {
             builder.append(expression2.substring(index));
 
             // 编译表达式
-            expr = ExpressionFactory.createExpression(builder.toString());
+            JexlEngine expressionFactory = new JexlEngine();
+            expr = expressionFactory.createExpression(builder.toString());
             CACHE.putIfAbsent(expression2, expr);
         }
 

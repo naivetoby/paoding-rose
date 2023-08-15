@@ -19,7 +19,7 @@ import net.paoding.rose.jade.annotation.RowHandler;
 import net.paoding.rose.jade.annotation.StatementRowMapper;
 import net.paoding.rose.jade.excetion.JadeException;
 import net.paoding.rose.jade.statement.StatementMetaData;
-import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanInstantiationException;
@@ -167,7 +167,7 @@ public class DefaultRowMapperFactory implements RowMapperFactory {
     private static Class<?> getRowType(StatementMetaData statementMetaData) {
         Class<?> returnClassType = statementMetaData.getReturnType();
         if (Collection.class.isAssignableFrom(returnClassType)//
-                || Iterable.class == returnClassType // 
+                || Iterable.class == returnClassType //
                 || Iterator.class == returnClassType) {
             return getRowTypeFromCollectionType(statementMetaData, returnClassType);
         } //
