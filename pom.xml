@@ -212,26 +212,19 @@
 
     <repositories>
         <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>gitlab-maven</id>
+            <url>https://git.fewper.com/api/v4/groups/15/-/packages/maven</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>ali-rdc-releases</id>
-            <url>https://repo.rdc.aliyun.com/repository/128147-release-XAwKUr/</url>
+            <id>gitlab-maven</id>
+            <url>https://git.fewper.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
         </repository>
         <snapshotRepository>
-            <id>ali-rdc-snapshots</id>
-            <url>https://repo.rdc.aliyun.com/repository/128147-snapshot-qwChov/</url>
+            <id>gitlab-maven</id>
+            <url>https://git.fewper.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
         </snapshotRepository>
     </distributionManagement>
 
