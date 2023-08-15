@@ -1,0 +1,22 @@
+stages:
+  - release
+
+variables:
+  MAVEN_CLI_OPTS: "-s ci_settings.xml --batch-mode -U"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  key: maven-ci-cache
+  paths:
+    - .m2/repository/
+
+release:
+  stage: release
+  image: git.fewper.com:5050/docker-image/maven-amazoncorretto17:latest
+  script:
+    - mvn $MAVEN_CLI_OPTS clean
+    - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true
+  only:
+    - main
+  tags:
+    - library-runner
