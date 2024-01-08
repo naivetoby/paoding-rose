@@ -26,8 +26,6 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
-import org.springframework.context.index.CandidateComponentsIndex;
-import org.springframework.context.index.CandidateComponentsIndexLoader;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -38,12 +36,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +68,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
     /**
      * 数据存取器工厂，通过它可以得到一个对数据库进行操作的实现
      * <p>
+     *
      * @see #getDataAccessFactory()
      */
     private DataAccessFactory dataAccessFactory;
@@ -82,6 +76,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
     /**
      * 行映射器工厂，通过它可以得到一个数据库表的行映射器实现，使得从数据库读取的记录可以映射为一个对象
      * <p>
+     *
      * @see #getRowMapperFactory()
      */
     private RowMapperFactory rowMapperFactory;
@@ -89,6 +84,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
     /**
      * 解释器工厂，通过它可以或得一个DAO方法对应的解析器数组，这些解析器数组将解析每一次DAO操作，进行SQL解析或设置运行时状态
      * <p>
+     *
      * @see #getInterpreterFactory()
      */
     private InterpreterFactory interpreterFactory;
@@ -137,8 +133,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
                 if (ArrayUtils.contains(names, topPriority)) {
                     cacheProviderName = topPriority;
                 } else {
-                    throw new IllegalStateException(
-                            "required not more than 1 CacheProvider, but found " + names.length);
+                    throw new IllegalStateException("required not more than 1 CacheProvider, but found " + names.length);
                 }
             }
         }
@@ -157,8 +152,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
                 if (ArrayUtils.contains(names, topPriority)) {
                     statmentWrapperProviderName = topPriority;
                 } else {
-                    throw new IllegalStateException(
-                            "required not more than 1 StatmentWrapperProvider, but found " + names.length);
+                    throw new IllegalStateException("required not more than 1 StatmentWrapperProvider, but found " + names.length);
                 }
             }
         }
@@ -175,8 +169,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
         } else {
             // 通过 spring-context-indexer 或者 ClassPathScanningCandidateComponentProvider 获取DAO注解标注的repository
             // 获取要扫描的包
-            Map<String, Object> annotationAttributes =
-                    importingClassMetadata.getAnnotationAttributes(EnablePaodingRoseJade.class.getName());
+            Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(EnablePaodingRoseJade.class.getName());
             Set<String> scanPackages = new HashSet<>();
             if (Objects.nonNull(annotationAttributes) && annotationAttributes.containsKey("basePackage")) {
                 String[] basePackage = (String[]) annotationAttributes.get("basePackage");
@@ -185,28 +178,19 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
             if (CollectionUtils.isEmpty(scanPackages)) {
                 scanPackages.add(ClassUtils.getPackageName(importingClassMetadata.getClassName()));
             }
-            // 通过 spring-context-indexer 获取DAO注解标注的repository
-            CandidateComponentsIndex candidateComponentsIndex = CandidateComponentsIndexLoader.loadIndex(this.getClass().getClassLoader());
-            if (Objects.nonNull(candidateComponentsIndex)) {
-                String stereotype = DAO.class.getName();
-                candidateTypes = scanPackages.stream()
-                        .map(scanPackage -> candidateComponentsIndex.getCandidateTypes(scanPackage, stereotype))
-                        .flatMap(Collection::stream).collect(Collectors.toSet());
-                beanDefinitions = this.getBeanDefinitions4CandodateType(candidateTypes);
-            } else {
-                // 通过 ClassPathScanningCandidateComponentProvider 获取DAO注解标注的repository
-                ClassPathScanningCandidateComponentProvider scanner =
-                        new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
-                            @Override
-                            protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-                                return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
-                            }
-                        };
-                scanner.setResourceLoader(this.resourceLoader);
-                scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
-                beanDefinitions = scanPackages.stream()
-                        .map(scanner::findCandidateComponents).flatMap(Collection::stream).collect(Collectors.toSet());
-            }
+            // 通过 ClassPathScanningCandidateComponentProvider 获取DAO注解标注的repository
+            ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(Boolean.FALSE, this.environment) {
+                @Override
+                protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+                    return beanDefinition.getMetadata().isIndependent() && !beanDefinition.getMetadata().isAnnotation();
+                }
+            };
+            scanner.setResourceLoader(this.resourceLoader);
+            scanner.addIncludeFilter(new AnnotationTypeFilter(DAO.class));
+            beanDefinitions = scanPackages.stream()
+                    .map(scanner::findCandidateComponents)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
         }
         // 注册
         this.registerBeanDefinition(registry, beanDefinitions);
@@ -214,6 +198,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
 
     /**
      * 通过 candidate type 生成 bean definition
+     *
      * @param candidateTypes
      * @return
      */
@@ -235,6 +220,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
 
     /**
      * registerBeanDefinition
+     *
      * @param registry
      * @param beanDefinitions
      */
