@@ -245,6 +245,7 @@ public class JadeBeanFactoryRegister implements ImportBeanDefinitionRegistrar, B
                 RuntimeBeanReference beanRef = new RuntimeBeanReference(statementWrapperProvider);
                 propertyValues.addPropertyValue("statementWrapperProvider", beanRef);
             }
+            beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
             ScannedGenericBeanDefinition scannedBeanDefinition = (ScannedGenericBeanDefinition) beanDefinition;
             scannedBeanDefinition.setPropertyValues(propertyValues);
             scannedBeanDefinition.setBeanClass(JadeFactoryBean.class);
