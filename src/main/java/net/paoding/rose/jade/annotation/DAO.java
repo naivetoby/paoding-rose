@@ -15,6 +15,7 @@
  */
 package net.paoding.rose.jade.annotation;
 
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Indexed;
 
 import java.lang.annotation.Documented;
@@ -50,6 +51,7 @@ import java.sql.Connection;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Component
 public @interface DAO {
 
     /**

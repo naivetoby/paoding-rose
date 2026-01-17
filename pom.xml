@@ -4,7 +4,7 @@
 
     <groupId>com.fewper</groupId>
     <artifactId>paoding-rose-jade</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.3.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <name>paoding-rose-jade</name>
@@ -14,12 +14,12 @@
     </description>
 
     <properties>
-        <jakarta-servlet.version>6.0.0</jakarta-servlet.version>
-        <spring.version>6.1.2</spring.version>
-        <spring-boot.version>3.2.1</spring-boot.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
-        <commons-jexl.version>2.1.1</commons-jexl.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
+        <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
+        <spring.version>7.0.2</spring.version>
+        <spring-boot.version>4.0.1</spring-boot.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-jexl3.version>3.6.1</commons-jexl3.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/
         </sonatypeOssDistMgmtSnapshotsUrl>
@@ -40,8 +40,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-jexl</artifactId>
-            <version>${commons-jexl.version}</version>
+            <artifactId>commons-jexl3</artifactId>
+            <version>${commons-jexl3.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>3.1.2</version>
+            <version>4.0.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -103,10 +103,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.14.1</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>21</source>
+                    <target>21</target>
                     <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
             </plugin>
@@ -114,7 +114,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.5.4</version>
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
@@ -130,7 +130,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.3.0</version>
+                        <version>3.4.0</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -143,7 +143,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.6.3</version>
+                        <version>3.12.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -159,7 +159,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -209,23 +209,5 @@
             <organization>ZFS</organization>
         </developer>
     </developers>
-
-    <repositories>
-        <repository>
-            <id>gitlab-maven</id>
-            <url>https://git.fewper.com/api/v4/groups/15/-/packages/maven</url>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>gitlab-maven</id>
-            <url>https://git.fewper.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
-        </repository>
-        <snapshotRepository>
-            <id>gitlab-maven</id>
-            <url>https://git.fewper.com/api/v4/projects/${env.CI_PROJECT_ID}/packages/maven</url>
-        </snapshotRepository>
-    </distributionManagement>
 
 </project>

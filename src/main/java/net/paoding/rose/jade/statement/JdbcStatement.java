@@ -180,30 +180,114 @@ public class JdbcStatement implements Statement {
     }
 
     private void log(Map<String, Object> parameters, StatementRuntime runtime) {
-        if (sqlLogger.isInfoEnabled()) {
-            StringBuilder sql = new StringBuilder(runtime.getSQL());
-            List<Object> args = runtime.getArgs();
-            StringBuilder sb = new StringBuilder(1024);
-            sb.append(logPrefix);
-            sb.append("\n\t#SQL:\t").append(runtime.getMetaData().getSQL());
-            sb.append("\n\t@sql:\t").append(sql);
-            sb.append("\n\t@args:\t");
-            ArrayList<String> keys = new ArrayList<String>(parameters.keySet());
-            Collections.sort(keys);
-            for (String key : keys) {
-                sb.append(key).append("='").append(parameters.get(key)).append("'  ");
-            }
-            sb.append("\n\t$sql:\t").append(runtime.getSQL());
-            String[] splitSql = sql.toString().split("\\?");
-            if (!ObjectUtils.isEmpty(splitSql) && !CollectionUtils.isEmpty(args) && splitSql.length == args.size()) {
-                sql = new StringBuilder();
-                for (int i = 0; i < splitSql.length; i++) {
-                    sql.append(splitSql[i]).append("'").append(args.get(i)).append("'");
-                }
-                sb.append("\n\tSQL:\t").append(sql);
-            }
-            sqlLogger.info(sb.toString());
+        if (!sqlLogger.isInfoEnabled()) return;
+
+        // 获取原始 SQL 并处理换行
+        String cleanSql = runtime.getSQL().replaceAll("\\s+", " ").trim();
+        List<Object> args = runtime.getArgs();
+
+        StringBuilder sb = new StringBuilder(512); // 512 足够了
+        sb.append(logPrefix);
+        sb.append("\n\t#SQL:\t").append(runtime.getMetaData().getSQL().replaceAll("\\s+", " ").trim());
+        sb.append("\n\t@sql:\t").append(cleanSql);
+
+        // 参数部分
+        sb.append("\n\t@args:\t");
+        List<String> keys = new ArrayList<>(parameters.keySet());
+        Collections.sort(keys);
+        for (String key : keys) {
+            sb.append(key).append("='").append(parameters.get(key)).append("'  ");
         }
+
+//        // 拼接完整 SQL 的逻辑
+//        // 使用 -1 确保末尾的问号能被正确拆分
+//        String[] parts = cleanSql.split("\\?", -1);
+//
+//        // 严谨判断：零件数必须等于参数数 + 1
+//        if (args != null && parts.length == args.size() + 1) {
+//            StringBuilder fullSql = new StringBuilder(cleanSql.length() + args.size() * 10);
+//            for (int i = 0; i < args.size(); i++) {
+//                fullSql.append(parts[i]);
+//                Object val = args.get(i);
+//                // 简单处理：如果是字符串加引号，null 打印为 NULL
+//                if (val instanceof String) {
+//                    fullSql.append("'").append(val).append("'");
+//                } else {
+//                    fullSql.append(val);
+//                }
+//            }
+//            fullSql.append(parts[parts.length - 1]); // 加上最后一段
+//            sb.append("\n\tSQL:\t").append(fullSql);
+//        }
+
+        sqlLogger.info(sb.toString());
     }
+
+//    private void log(Map<String, Object> parameters, StatementRuntime runtime) {
+//        if (sqlLogger.isInfoEnabled()) {
+//            StringBuilder sql = new StringBuilder(runtime.getSQL().replaceAll("\\s+", " ").trim());
+//            List<Object> args = runtime.getArgs();
+//            StringBuilder sb = new StringBuilder(1024);
+//            sb.append(logPrefix);
+//            sb.append("\n\t#SQL:\t").append(runtime.getMetaData().getSQL().replaceAll("\\s+", " ").trim());
+//            sb.append("\n\t@sql:\t").append(sql);
+//            sb.append("\n\t@args:\t");
+//            ArrayList<String> keys = new ArrayList<String>(parameters.keySet());
+//            Collections.sort(keys);
+//            for (String key : keys) {
+//                sb.append(key).append("='").append(parameters.get(key)).append("'  ");
+//            }
+//            // sb.append("\n\t$sql:\t").append(runtime.getSQL());
+//            String[] splitSql = sql.toString().split("\\?");
+//            if (!ObjectUtils.isEmpty(splitSql) && !CollectionUtils.isEmpty(args) && splitSql.length - 1 == args.size()) {
+//                sql = new StringBuilder();
+//                for (int i = 0; i < args.size(); i++) {
+//                    sql.append(splitSql[i]).append("'").append(args.get(i)).append("'");
+//                }
+//                sql.append(splitSql[splitSql.length-1]);
+//                sb.append("\n\tSQL:\t").append(sql.toString().replaceAll("\\s+", " ").trim());
+//            }
+//            sqlLogger.info(sb.toString());
+//        }
+//    }
+
+//    private void log(Map<String, Object> parameters, StatementRuntime runtime) {
+//        if (sqlLogger.isInfoEnabled()) {
+//            String rawSql = runtime.getSQL();
+//            // 1. 去掉 SQL 内部的换行符和多余空格，使其变回单行
+//            String singleLineSql = rawSql.replaceAll("\\s+", " ").trim();
+//
+//            StringBuilder sb = new StringBuilder(512);
+//            sb.append(logPrefix);
+//
+//            // 2. 只记录一次带占位符的单行 SQL
+//            sb.append("\n\t[SQL]:\t").append(singleLineSql);
+//
+//            // 3. 记录参数 (保持在一行)
+//            sb.append("\n\t[Args]:\t{");
+//            List<String> keys = new ArrayList<>(parameters.keySet());
+//            Collections.sort(keys);
+//            for (int i = 0; i < keys.size(); i++) {
+//                String key = keys.get(i);
+//                sb.append(key).append("=").append(parameters.get(key));
+//                if (i < keys.size() - 1) sb.append(", ");
+//            }
+//            sb.append("}");
+//
+//            // 4. (可选) 如果你想看填充后的完整 SQL，可以取消下面注释，同样处理为单行
+//            List<Object> args = runtime.getArgs();
+//            String[] splitSql = rawSql.split("\\?");
+//            if (!ObjectUtils.isEmpty(splitSql) && !CollectionUtils.isEmpty(args) && splitSql.length - 1 == args.size()) {
+//                StringBuilder fullSql = new StringBuilder();
+//                for (int i = 0; i < args.size(); i++) {
+//                    fullSql.append(splitSql[i]).append("'").append(args.get(i)).append("'");
+//                }
+//                fullSql.append(splitSql[splitSql.length-1]);
+//                sb.append("\n\t[FullSQL]: ").append(fullSql.toString().replaceAll("\\s+", " ").trim());
+//            }
+//
+//            sqlLogger.info(sb.toString());
+//        }
+//    }
 
 }

@@ -1,10 +1,7 @@
 package net.paoding.rose.jade.statement.expression.impl;
 
 import net.paoding.rose.jade.statement.expression.ExprResolver;
-import org.apache.commons.jexl2.Expression;
-import org.apache.commons.jexl2.JexlContext;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.jexl3.*;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.HashMap;
@@ -21,7 +18,7 @@ import java.util.regex.Pattern;
 public class ExprResolverImpl implements ExprResolver {
 
     // 表达式的缓存
-    protected static final ConcurrentHashMap<String, Expression> CACHE = new ConcurrentHashMap<String, Expression>();
+    protected static final ConcurrentHashMap<String, JexlExpression> CACHE = new ConcurrentHashMap<String, JexlExpression>();
 
     // 正则表达式
     //private static final Pattern PREFIX_PATTERN = Pattern.compile( // NL
@@ -44,6 +41,10 @@ public class ExprResolverImpl implements ExprResolver {
 
     // Common Jexl 上下文
     protected final JexlContext context = new MapContext();
+
+    private static final JexlEngine JEXL_ENGINE = new JexlBuilder()
+            .permissions(org.apache.commons.jexl3.introspection.JexlPermissions.UNRESTRICTED) // 关键：解除权限限制
+            .create();
 
     /**
      * 构造表达式处理器。
@@ -129,7 +130,7 @@ public class ExprResolverImpl implements ExprResolver {
     public Object executeExpr(final String expression) throws Exception {
 
         // 从缓存中获取解析的表达式
-        Expression expr = CACHE.get(expression);
+        JexlExpression expr = CACHE.get(expression);
 
         if (expr == null) {
             //
@@ -206,8 +207,7 @@ public class ExprResolverImpl implements ExprResolver {
             builder.append(expression2.substring(index));
 
             // 编译表达式
-            JexlEngine expressionFactory = new JexlEngine();
-            expr = expressionFactory.createExpression(builder.toString());
+            expr = JEXL_ENGINE.createExpression(builder.toString());
             CACHE.putIfAbsent(expression2, expr);
         }
 
