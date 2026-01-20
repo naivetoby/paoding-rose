@@ -15,7 +15,7 @@ release:
   image: git.fewper.com:5050/docker-image/maven-amazoncorretto21:latest
   script:
     - mvn $MAVEN_CLI_OPTS clean
-    - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true -DaltDeploymentRepository=gitlab-maven::default::https://git.fewper.com/api/v4/projects/${CI_PROJECT_ID}/packages/maven
+    - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true -DaltDeploymentRepository=gitlab-maven::https://git.fewper.com/api/v4/projects/${CI_PROJECT_ID}/packages/maven
   only:
     - main
   tags:
